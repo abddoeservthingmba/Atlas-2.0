@@ -168,9 +168,16 @@ The section on the home page renders **only when real reviews exist**. It is
 empty by default and there is no placeholder copy anywhere: an invented
 testimonial on a real gym is fake social proof.
 
+**This project populates them by hand.** Paste real reviews from the Google
+listing into `MANUAL_REVIEWS` in `src/data/reviews.ts`, verbatim — the file has
+a worked example. Three to five is the right number.
+
+The API route below is wired up but not in use; it is here for whenever
+automatic refresh is worth setting up.
+
 Google does not serve reviews in the HTML of a Maps link — the page is a
 JavaScript shell — and scraping them breaches Google's terms. The supported
-route is the Places API:
+automatic route is the Places API:
 
 ```sh
 GOOGLE_PLACES_API_KEY=xxx pnpm reviews:fetch     # finds the place, prints its id

@@ -44,10 +44,37 @@ export interface ReviewSummary {
 }
 
 /**
- * Reviews entered by hand. Only ever real, verbatim text from the listing.
- * Used when the API route is not set up.
+ * Reviews entered by hand — the route this project uses.
+ *
+ * Copy real reviews from the Google listing and paste them in. Verbatim: do
+ * not tidy the grammar, trim the awkward bits, or write a better version of
+ * what someone meant. An edited review is no longer their words, and an
+ * invented one is fake social proof on a real business.
+ *
+ * Three to five is the right number. More reads as a wall and nobody finishes
+ * it. Delete the example below and replace it with the real thing:
+ *
+ *   {
+ *     author: 'Full name as Google shows it',
+ *     rating: 5,
+ *     text: 'The review, exactly as written.',
+ *     when: '2 months ago',
+ *   },
+ *
+ * Once at least one entry exists the section appears on the home page. Until
+ * then it is not rendered at all — see HAS_REVIEWS below.
+ *
+ * Set REVIEW_SUMMARY_MANUAL too if you want the headline score and rating
+ * count shown above the cards.
  */
 const MANUAL_REVIEWS: readonly Review[] = [];
+
+/**
+ * The overall score, if you want it displayed. Take both numbers straight from
+ * the Google listing; a rounded or rounded-up figure here is a fabricated
+ * statistic, however small.
+ */
+const REVIEW_SUMMARY_MANUAL: ReviewSummary | null = null;
 
 interface GeneratedShape {
   reviews?: Review[];
@@ -60,7 +87,7 @@ const g = generated as GeneratedShape;
 /** Generated data wins when present; hand-entered is the fallback. */
 export const REVIEWS: readonly Review[] = g.reviews?.length ? g.reviews : MANUAL_REVIEWS;
 
-export const REVIEW_SUMMARY: ReviewSummary | null = g.summary ?? null;
+export const REVIEW_SUMMARY: ReviewSummary | null = g.summary ?? REVIEW_SUMMARY_MANUAL;
 
 /** When this is false the section is not rendered at all. */
 export const HAS_REVIEWS = REVIEWS.length > 0;
