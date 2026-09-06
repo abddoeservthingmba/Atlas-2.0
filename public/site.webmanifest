@@ -1,0 +1,12 @@
+{
+  "name": "Atlas Fitness Elite",
+  "short_name": "Atlas",
+  "description": "Atlas Fitness Elite",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0e1013",
+  "theme_color": "#0e1013",
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" }
+  ]
+}

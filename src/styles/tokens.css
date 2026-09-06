@@ -1,0 +1,300 @@
+/* ==========================================================================
+   tokens.css — the single source of truth for design decisions.
+
+   Every colour, size, space, radius, duration and layout constant used
+   anywhere in this site is declared here. Components must never hard-code a
+   raw value; they reference a token. Rebranding = editing this file.
+
+   Reading order:
+     1. Primitives   — raw ramps. Named by what they ARE (grey-700).
+     2. Semantics    — roles. Named by what they DO (--color-text-muted).
+     3. Type scale
+     4. Space scale
+     5. Radii, borders, elevation
+     6. Layout
+     7. Motion
+     8. Z-index
+
+   Components should reference SEMANTIC tokens wherever one exists, so a
+   brand swap in section 1 propagates everywhere for free.
+   ========================================================================== */
+
+:root {
+  /* ======================================================================
+     1. PRIMITIVES — colour ramps
+     ====================================================================== */
+
+  /* ---- Neutrals -------------------------------------------------------
+     Slightly warm-neutral grey ramp. Used for text, surfaces, borders and
+     the desktop surround. These are intentionally brand-agnostic and can
+     usually survive a rebrand untouched — but if the brand palette is warm
+     or cool, nudge the hue here so neutrals sit in the same family.
+     -------------------------------------------------------------------- */
+  --grey-0:    #ffffff;
+  --grey-50:   #f7f7f8;
+  --grey-100:  #ededef;
+  --grey-200:  #dcdce0;
+  --grey-300:  #c2c2c8;
+  --grey-400:  #9a9aa3;
+  --grey-500:  #74747e;
+  --grey-600:  #55555e;
+  --grey-700:  #3d3d45;
+  --grey-800:  #26262c;
+  --grey-900:  #171a1d;
+  --grey-950:  #0e1013;
+  --grey-1000: #05070a;
+
+  /* ---- Brand ----------------------------------------------------------
+     TODO: replace with client hex.
+     Placeholder = desaturated neutral ramp, deliberately colourless so that
+     nothing in the design reads as "finished" until the real palette lands.
+     Supply the brand colour as a mid value (~-500) and the ramp will be
+     regenerated around it. Keep --brand-500 to --brand-900 dark enough to
+     carry white text at >=4.5:1.
+     -------------------------------------------------------------------- */
+  --brand-50:  #f4f5f6; /* TODO: replace with client hex */
+  --brand-100: #e6e8ea; /* TODO: replace with client hex */
+  --brand-200: #ccd0d4; /* TODO: replace with client hex */
+  --brand-300: #a8aeb5; /* TODO: replace with client hex */
+  --brand-400: #7d858e; /* TODO: replace with client hex */
+  --brand-500: #5b636d; /* TODO: replace with client hex — primary brand colour */
+  --brand-600: #474e57; /* TODO: replace with client hex */
+  --brand-700: #363c44; /* TODO: replace with client hex */
+  --brand-800: #262b31; /* TODO: replace with client hex */
+  --brand-900: #191d21; /* TODO: replace with client hex */
+
+  /* ---- Accent ---------------------------------------------------------
+     TODO: replace with client hex.
+     The single high-energy colour reserved for CTAs and moments that must
+     be noticed. Gyms typically want this loud (electric lime, hot orange,
+     signal red). Placeholder is neutral on purpose.
+     -------------------------------------------------------------------- */
+  --accent-100: #eceef0; /* TODO: replace with client hex */
+  --accent-300: #b9bfc6; /* TODO: replace with client hex */
+  --accent-500: #8b939c; /* TODO: replace with client hex — primary CTA fill */
+  --accent-600: #6f767e; /* TODO: replace with client hex — CTA hover/active */
+  --accent-700: #565c63; /* TODO: replace with client hex */
+
+  /* ---- Status ---------------------------------------------------------
+     Functional only (form validation, availability). Not brand colours —
+     these should generally stay recognisable regardless of the palette.
+     -------------------------------------------------------------------- */
+  --success-500: #1f8a54;
+  --warning-500: #b5730a;
+  --danger-500:  #c0392b;
+
+  /* ======================================================================
+     2. SEMANTIC COLOUR — roles, not values.
+        Components use these. Swap section 1, and these follow.
+     ====================================================================== */
+
+  /* Surfaces */
+  --color-surround:        var(--grey-950);  /* the darker field around the phone column */
+  --color-surface:         var(--grey-0);    /* the content column itself */
+  --color-surface-subtle:  var(--grey-50);   /* alternating section bands */
+  --color-surface-sunken:  var(--grey-100);  /* wells, inset panels */
+  --color-surface-inverse: var(--grey-900);  /* dark sections inside the column */
+
+  /* Text */
+  --color-text:           var(--grey-900);
+  --color-text-muted:     var(--grey-600);
+  --color-text-subtle:    var(--grey-500);
+  --color-text-inverse:   var(--grey-0);
+  --color-text-on-accent: var(--grey-0);   /* TODO: verify contrast once accent lands */
+  --color-text-on-brand:  var(--grey-0);   /* TODO: verify contrast once brand lands */
+
+  /* Lines */
+  --color-border:        var(--grey-200);
+  --color-border-strong: var(--grey-300);
+  --color-divider:       var(--grey-100);
+
+  /* Interactive */
+  --color-action:          var(--accent-500);
+  --color-action-hover:    var(--accent-600);
+  --color-action-active:   var(--accent-700);
+  --color-action-subtle:   var(--accent-100);
+  --color-link:            var(--brand-700);
+  --color-focus-ring:      var(--brand-600);
+
+  /* Feedback */
+  --color-success: var(--success-500);
+  --color-warning: var(--warning-500);
+  --color-danger:  var(--danger-500);
+
+  /* ======================================================================
+     3. TYPE
+        Modular scale, ratio 1.2 (minor third-ish) on a 16px base. The
+        content column is capped at 480px, so sizes are fixed rather than
+        fluid — a fixed scale is more predictable and there is no wide
+        viewport to fill.
+     ====================================================================== */
+
+  /* Families.
+     TODO: replace with client brand fonts. Placeholder is the system stack,
+     which costs nothing to load and reads acceptably on every phone. */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+               'Helvetica Neue', Arial, 'Noto Sans', sans-serif,
+               'Apple Color Emoji', 'Segoe UI Emoji';
+  --font-display: var(--font-sans); /* TODO: replace with client display face */
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+               'Liberation Mono', monospace;
+
+  /* Sizes */
+  --text-2xs: 0.694rem; /* 11.1px — legal, disclaimers */
+  --text-xs:  0.833rem; /* 13.3px — captions, meta */
+  --text-sm:  0.9rem;   /* 14.4px — secondary body, labels */
+  --text-base: 1rem;    /* 16px   — body. Never go below this for prose. */
+  --text-md:  1.125rem; /* 18px   — lead paragraph */
+  --text-lg:  1.35rem;  /* 21.6px — h3 */
+  --text-xl:  1.62rem;  /* 25.9px — h2 */
+  --text-2xl: 1.944rem; /* 31.1px — h1 on interior pages */
+  --text-3xl: 2.333rem; /* 37.3px — hero */
+  --text-4xl: 2.8rem;   /* 44.8px — oversized display */
+
+  /* Weights */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+  --weight-black:    800;
+
+  /* Line heights */
+  --leading-none:    1;
+  --leading-tight:   1.15; /* display / headlines */
+  --leading-snug:    1.3;  /* subheads */
+  --leading-normal:  1.55; /* body prose */
+  --leading-relaxed: 1.7;  /* long-form */
+
+  /* Letter spacing */
+  --tracking-tighter: -0.03em; /* large display type */
+  --tracking-tight:   -0.015em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.04em;
+  --tracking-wider:   0.12em; /* small caps eyebrows */
+
+  /* Prose measure — irrelevant inside a 480px column, kept for wide embeds */
+  --measure: 62ch;
+
+  /* ======================================================================
+     4. SPACE
+        4px base grid. Use these for margin, padding and gap — nothing else.
+     ====================================================================== */
+  --space-0:   0;
+  --space-px:  1px;
+  --space-1:   0.25rem; /*  4px */
+  --space-2:   0.5rem;  /*  8px */
+  --space-3:   0.75rem; /* 12px */
+  --space-4:   1rem;    /* 16px */
+  --space-5:   1.25rem; /* 20px */
+  --space-6:   1.5rem;  /* 24px */
+  --space-8:   2rem;    /* 32px */
+  --space-10:  2.5rem;  /* 40px */
+  --space-12:  3rem;    /* 48px */
+  --space-16:  4rem;    /* 64px */
+  --space-20:  5rem;    /* 80px */
+  --space-24:  6rem;    /* 96px */
+  --space-32:  8rem;    /* 128px */
+
+  /* Composed spacing — change the rhythm of the whole site from here */
+  --space-gutter:         var(--space-5);  /* left/right page padding */
+  --space-section:        var(--space-12); /* vertical padding per section */
+  --space-section-tight:  var(--space-8);
+  --space-section-loose:  var(--space-16);
+  --space-stack:          var(--space-4);  /* default gap between siblings */
+
+  /* ======================================================================
+     5. RADII, BORDERS, ELEVATION
+     ====================================================================== */
+  --radius-none: 0;
+  --radius-xs:   2px;
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-2xl:  24px;
+  --radius-pill: 999px;
+  --radius-circle: 50%;
+
+  /* TODO: confirm brand shape language — a gym brand is often either
+     hard-edged (set every radius to 0/xs) or fully pill-shaped. */
+  --radius-button: var(--radius-md);
+  --radius-card:   var(--radius-lg);
+  --radius-input:  var(--radius-md);
+  --radius-image:  var(--radius-lg);
+
+  --border-width:        1px;
+  --border-width-thick:  2px;
+  --border-hairline:     var(--border-width) solid var(--color-border);
+
+  /* Shadows are deliberately restrained; on mobile they mostly read as noise. */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.06);
+  --shadow-md: 0 2px 8px rgb(0 0 0 / 0.08);
+  --shadow-lg: 0 8px 24px rgb(0 0 0 / 0.12);
+  --shadow-cta: 0 -1px 0 var(--color-border), 0 -8px 24px rgb(0 0 0 / 0.06);
+  --shadow-column: 0 0 0 1px rgb(0 0 0 / 0.06), 0 24px 64px rgb(0 0 0 / 0.45);
+
+  /* ======================================================================
+     6. LAYOUT
+        Mobile-first. The design IS the 480px column; wider viewports get a
+        dark surround so desktop reads as an intentional frame rather than a
+        stretched phone layout.
+     ====================================================================== */
+  --layout-max:      480px; /* the content column cap */
+  --layout-gutter:   var(--space-gutter);
+  --layout-content:  calc(var(--layout-max) - (var(--layout-gutter) * 2));
+
+  /* Touch targets — 44px is the accessible floor; 48 is the comfortable one. */
+  --tap-min:     44px;
+  --tap-comfy:   48px;
+  --tap-large:   56px;
+
+  /* Sticky bottom CTA bar */
+  --cta-height:      64px;                 /* thumb-height bar */
+  --cta-padding-y:   var(--space-2);
+  --cta-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --cta-total:       calc(var(--cta-height) + var(--cta-safe-bottom));
+  /* Every page reserves this much bottom padding so the bar never covers content. */
+  --cta-clearance:   calc(var(--cta-total) + var(--space-4));
+
+  /* Header, if/when one is added */
+  --header-height: 56px;
+
+  /* ======================================================================
+     7. MOTION
+        Short and mostly translate/opacity. All of it is disabled under
+        prefers-reduced-motion in global.css.
+     ====================================================================== */
+  --duration-instant: 80ms;
+  --duration-fast:    150ms;
+  --duration-base:    220ms;
+  --duration-slow:    360ms;
+
+  --ease-standard:  cubic-bezier(0.2, 0, 0, 1);
+  --ease-out:       cubic-bezier(0, 0, 0.2, 1);
+  --ease-in:        cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring:    cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  --transition-colors: color var(--duration-fast) var(--ease-standard),
+                       background-color var(--duration-fast) var(--ease-standard),
+                       border-color var(--duration-fast) var(--ease-standard);
+
+  /* ======================================================================
+     8. Z-INDEX — the complete stacking contract. No ad-hoc values.
+     ====================================================================== */
+  --z-below:    -1;
+  --z-base:      0;
+  --z-raised:    10;
+  --z-sticky:    100;
+  --z-header:    200;
+  --z-cta:       300;
+  --z-overlay:   400;
+  --z-modal:     500;
+  --z-toast:     600;
+
+  /* ======================================================================
+     9. MISC
+     ====================================================================== */
+  --focus-ring: 2px solid var(--color-focus-ring);
+  --focus-ring-offset: 2px;
+  --backdrop: rgb(5 7 10 / 0.6);
+}

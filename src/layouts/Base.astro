@@ -1,0 +1,174 @@
+---
+import { SITE, absoluteUrl, healthClubSchema } from '../config/site';
+import '../styles/global.css';
+
+interface Props {
+  /** Page title. Rendered through SITE.titleTemplate unless `titleTemplate` is false. */
+  title?: string;
+  titleTemplate?: boolean;
+  description?: string;
+  /** Path or absolute URL for the share image. Defaults to SITE.ogImage. */
+  image?: string;
+  imageAlt?: string;
+  /** 'website' for the home page, 'article' for posts. */
+  ogType?: 'website' | 'article';
+  /** Emit the HealthClub JSON-LD. True on the home page, false elsewhere. */
+  schema?: boolean;
+  noindex?: boolean;
+  /** Set false on pages that should not show the sticky CTA (e.g. a signup form). */
+  showCta?: boolean;
+  bodyClass?: string | undefined;
+}
+
+const {
+  title,
+  titleTemplate = true,
+  description = SITE.description,
+  image = SITE.ogImage,
+  imageAlt = SITE.ogImageAlt,
+  ogType = 'website',
+  schema = false,
+  noindex = false,
+  showCta = true,
+  bodyClass,
+} = Astro.props;
+
+const pageTitle = title
+  ? titleTemplate
+    ? SITE.titleTemplate.replace('%s', title)
+    : title
+  : SITE.title;
+
+// Canonical is built from the configured `site` origin, never from the request
+// host, so preview/dev origins never leak into production markup.
+const canonical = absoluteUrl(Astro.url.pathname, SITE.url);
+const socialImage = absoluteUrl(image, SITE.url);
+const jsonLd = schema ? JSON.stringify(healthClubSchema(canonical)) : null;
+---
+
+<!doctype html>
+<html lang={SITE.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <!-- viewport-fit=cover lets the layout extend under the notch and home
+         indicator; safe-area insets are handled in global.css. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="generator" content={Astro.generator} />
+
+    {
+      noindex ? (
+        <meta name="robots" content="noindex, nofollow" />
+      ) : (
+        <meta name="robots" content="index, follow, max-image-preview:large" />
+      )
+    }
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={SITE.locale} />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
+    <meta name="twitter:image:alt" content={imageAlt} />
+    {SITE.twitterHandle && <meta name="twitter:site" content={SITE.twitterHandle} />}
+
+    <!-- Mobile chrome -->
+    <meta name="theme-color" content={SITE.themeColor} />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content={SITE.shortName} />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="color-scheme" content="light" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!--
+      FONTS
+      Currently the system stack (see --font-sans in tokens.css): zero network
+      cost and good on every phone.
+      TODO: when the brand faces land, self-host the woff2 files in
+      /public/fonts and preload only the weights actually used above the fold:
+
+      <link rel="preload" href="/fonts/brand-700.woff2" as="font"
+            type="font/woff2" crossorigin />
+
+      Then declare @font-face in global.css with `font-display: swap` and point
+      --font-display at the new family.
+    -->
+
+    <slot name="head" />
+
+    {
+      jsonLd && (
+        <script type="application/ld+json" set:html={jsonLd} is:inline />
+      )
+    }
+  </head>
+
+  <body class={bodyClass || undefined}>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="shell">
+      <slot name="header" />
+
+      <main id="main" class="shell__main">
+        <slot />
+      </main>
+
+      <slot name="footer" />
+
+      {
+        showCta && (
+          <slot name="cta">
+            <div class="cta-bar" role="region" aria-label="Primary actions">
+              <a class="cta-bar__action" href={SITE.cta.href}>
+                {SITE.cta.label}
+              </a>
+              <a
+                class="cta-bar__secondary"
+                href={SITE.cta.secondaryHref}
+                aria-label={`${SITE.cta.secondaryLabel} ${SITE.name}`}
+              >
+                {SITE.cta.secondaryLabel}
+              </a>
+            </div>
+          </slot>
+        )
+      }
+    </div>
+
+    {
+      /* Eruda: on-device console for phone review. Dev only — `import.meta.env.DEV`
+         is statically false in `astro build`, so this whole block is stripped
+         from the production output. */
+      import.meta.env.DEV && (
+        <Fragment>
+          <script is:inline src="https://cdn.jsdelivr.net/npm/eruda@3/eruda.min.js" />
+          <script is:inline>
+            {`if (window.eruda) { window.eruda.init(); } else { console.warn('[eruda] failed to load'); }`}
+          </script>
+        </Fragment>
+      )
+    }
+  </body>
+</html>

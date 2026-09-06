@@ -1,0 +1,364 @@
+/* ==========================================================================
+   global.css — reset, base typography, and the app shell layout.
+   No component styles belong here; no raw values belong here either.
+   ========================================================================== */
+
+@import './tokens.css';
+
+/* --------------------------------------------------------------------------
+   1. RESET
+   -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%; /* stop iOS enlarging text on rotate */
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
+  /* The surround must extend behind the notch and the home indicator. */
+  background-color: var(--color-surround);
+}
+
+body {
+  min-height: 100dvh;
+  background-color: var(--color-surround);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  font-weight: var(--weight-regular);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Never allow a stray wide element to introduce a sideways scroll on a phone. */
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  touch-action: manipulation; /* removes the 300ms tap delay on older mobile Safari */
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+  padding: 0;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+:target {
+  scroll-margin-top: var(--space-8);
+}
+
+/* --------------------------------------------------------------------------
+   2. BASE TYPOGRAPHY
+   -------------------------------------------------------------------------- */
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  text-wrap: balance;
+  color: var(--color-text);
+}
+
+h1 { font-size: var(--text-3xl); letter-spacing: var(--tracking-tighter); }
+h2 { font-size: var(--text-xl); }
+h3 { font-size: var(--text-lg); line-height: var(--leading-snug); }
+h4 { font-size: var(--text-md); line-height: var(--leading-snug); }
+
+p {
+  text-wrap: pretty;
+}
+
+small {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+strong,
+b {
+  font-weight: var(--weight-semibold);
+}
+
+a {
+  color: var(--color-link);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+  transition: var(--transition-colors);
+}
+
+a:hover {
+  color: var(--color-action-hover);
+}
+
+code,
+pre,
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* --------------------------------------------------------------------------
+   3. FOCUS — visible, always. Never remove without a replacement.
+   -------------------------------------------------------------------------- */
+
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-xs);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-2);
+  top: var(--space-2);
+  z-index: var(--z-toast);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* --------------------------------------------------------------------------
+   4. APP SHELL — the layout rule.
+
+   The design is a 480px column. On anything wider, the column is centred on
+   a darker surround so desktop reads as a deliberate frame, not a phone
+   layout stretched to fill a monitor.
+   -------------------------------------------------------------------------- */
+
+.shell {
+  width: 100%;
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface);
+  position: relative;
+  isolation: isolate; /* keeps the CTA bar's stacking context local to the column */
+}
+
+.shell__main {
+  flex: 1 1 auto;
+  /* Reserve room for the fixed CTA bar so it never covers the last element. */
+  padding-bottom: var(--cta-clearance);
+}
+
+/* Above the column width, lift the column off the surround. */
+@media (min-width: 481px) {
+  .shell {
+    box-shadow: var(--shadow-column);
+  }
+
+  /* A little breathing room top and bottom so the column reads as a card. */
+  body {
+    padding-block: 0;
+  }
+}
+
+/* Standard horizontal gutter. Every section should use this. */
+.container {
+  width: 100%;
+  padding-inline: var(--layout-gutter);
+  margin-inline: auto;
+}
+
+.section {
+  padding-block: var(--space-section);
+}
+
+/* Screen-reader-only, still focusable. */
+.visually-hidden:not(:focus):not(:active) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   5. STICKY BOTTOM CTA BAR
+
+   Fixed to the viewport bottom but constrained to the column width, so on
+   desktop it sits inside the frame rather than spanning the whole screen.
+   Height is thumb-sized and the safe-area inset is added as padding (not
+   height) so the tappable area stays constant across devices.
+   -------------------------------------------------------------------------- */
+
+.cta-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--layout-max);
+  z-index: var(--z-cta);
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  min-height: var(--cta-height);
+  padding: var(--cta-padding-y) var(--layout-gutter);
+  padding-bottom: calc(var(--cta-padding-y) + var(--cta-safe-bottom));
+
+  background-color: var(--color-surface);
+  border-top: var(--border-hairline);
+  box-shadow: var(--shadow-cta);
+
+  /* Frosted only where supported; the solid background above is the fallback. */
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+}
+
+.cta-bar__action {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+
+  min-height: var(--tap-large);
+  padding-inline: var(--space-5);
+
+  background-color: var(--color-action);
+  color: var(--color-text-on-accent);
+  border-radius: var(--radius-button);
+
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-base);
+  letter-spacing: var(--tracking-normal);
+  text-decoration: none;
+  text-align: center;
+
+  transition: var(--transition-colors), transform var(--duration-fast) var(--ease-standard);
+}
+
+.cta-bar__action:hover {
+  background-color: var(--color-action-hover);
+  color: var(--color-text-on-accent);
+}
+
+.cta-bar__action:active {
+  background-color: var(--color-action-active);
+  transform: scale(0.985);
+}
+
+.cta-bar__secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: var(--tap-comfy);
+  min-height: var(--tap-large);
+  padding-inline: var(--space-3);
+
+  border: var(--border-hairline);
+  border-radius: var(--radius-button);
+
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-sm);
+  text-decoration: none;
+
+  transition: var(--transition-colors);
+}
+
+.cta-bar__secondary:hover {
+  background-color: var(--color-surface-sunken);
+  color: var(--color-text);
+}
+
+/* --------------------------------------------------------------------------
+   6. REDUCED MOTION
+
+   Honour the OS setting. Animations are collapsed to a near-zero duration
+   rather than removed outright, so animation/transition end events still
+   fire and any JS that depends on them does not stall.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Kill the tap-scale feedback too; it is motion, not colour. */
+  .cta-bar__action:active {
+    transform: none;
+  }
+}
