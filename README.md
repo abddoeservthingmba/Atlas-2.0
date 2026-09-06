@@ -11,8 +11,11 @@ Mobile-first marketing site rebuild for [atlasfitnesselite.com](https://www.atla
 
 ## Hosting
 
-Deployed on Vercel (`vercel.json` pins the framework, install and build
-commands). The GitHub Pages workflow is kept as a fallback.
+**Live preview: https://atlas-2-0-lac.vercel.app/**
+
+Deployed on Vercel, auto-deploying on every push to `main` (`vercel.json`
+pins the framework, install and build commands). The GitHub Pages workflow is
+kept as a fallback.
 
 The build resolves its own origin, so canonical/OG tags and JSON-LD are
 correct on every host without per-host code:
