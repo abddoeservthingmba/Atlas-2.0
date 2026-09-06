@@ -1,0 +1,77 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { SITE, withBase } from '../config/site';
+import { VALUES, PROMISE } from '../data/content';
+---
+
+<Base
+  title="About"
+  description="Atlas Fitness Elite is a strength and conditioning gym in Mallapur, Hyderabad, built around coached training and a floor that people actually want to train on."
+>
+  <PageHeader
+    eyebrow="About"
+    title="Where strength meets community"
+    standfirst="Fitness here is more than reps and sets. The room is built for people who want to train seriously and be coached properly — beginners and athletes on the same floor."
+  />
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow section-head__eyebrow">Mission</p>
+        <h2 class="section-head__title">
+          Empowering transformations through expert guidance
+        </h2>
+        <p class="section-head__standfirst">
+          World-class training in an inclusive environment, where everyone from
+          first-timers to competing athletes can make progress that holds.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--sunken">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow section-head__eyebrow">Values</p>
+        <h2 class="section-head__title">What the floor runs on</h2>
+      </div>
+
+      <ul class="entries" role="list">
+        {
+          VALUES.map((item) => (
+            <li class="entry">
+              <h3 class="entry__name">{item.name}</h3>
+              <p class="entry__detail">{item.detail}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow section-head__eyebrow">Our promise</p>
+        <h2 class="section-head__title">What you can hold us to</h2>
+      </div>
+
+      <ul class="entries entries--compact" role="list">
+        {
+          PROMISE.map((item) => (
+            <li class="entry">
+              <h3 class="entry__name">{item.name}</h3>
+              <p class="entry__detail">{item.detail}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="actions">
+        <a class="btn btn--primary btn--block" href={SITE.cta.href}>Book a free trial</a>
+        <a class="btn btn--secondary btn--block" href={withBase('/contact')}>Visit us</a>
+      </div>
+    </div>
+  </section>
+</Base>

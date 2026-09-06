@@ -1,0 +1,51 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { SITE, withBase } from '../config/site';
+import { PROGRAMS } from '../data/content';
+---
+
+<Base
+  title="Programmes"
+  description="Nine coached programmes at Atlas Fitness Elite — strength and conditioning, calisthenics, Hyrox, parkour, OCR, flexibility, inversions, tumbling and kids parkour."
+>
+  <PageHeader
+    eyebrow="Programmes"
+    title="Nine ways to train"
+    standfirst="Whatever you are working towards, every programme is coached and scaled to the level you are at. Start with a free trial class in any of them."
+  />
+
+  <section class="section">
+    <div class="container">
+      <ul class="entries" role="list">
+        {
+          PROGRAMS.map((program) => (
+            <li class="entry" id={program.slug}>
+              <h2 class="program__name">{program.name}</h2>
+              <p class="entry__detail">{program.blurb}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="actions">
+        <a class="btn btn--primary btn--block" href={SITE.cta.href}>Book a free trial</a>
+        <a class="btn btn--secondary btn--block" href={withBase('/membership')}>See membership</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* Programme names are the page's structural rhythm, so they take the
+     grotesque at heading size rather than the display face — nine didone
+     headings in a row would be shouting. */
+  .program__name {
+    font-family: var(--font-sans);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-tight);
+    line-height: var(--leading-snug);
+    margin-bottom: var(--space-2);
+  }
+</style>

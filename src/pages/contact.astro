@@ -1,0 +1,134 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { SITE } from '../config/site';
+import { FAQS } from '../data/content';
+
+const mapsQuery = encodeURIComponent(
+  `${SITE.address.streetAddress}, ${SITE.address.addressLocality}, ${SITE.address.addressRegion} ${SITE.address.postalCode}`,
+);
+const mapsHref = `https://maps.google.com/maps?q=${mapsQuery}`;
+---
+
+<Base
+  title="Visit"
+  description="Atlas Fitness Elite, New Narsina Nagar, Mallapur, Hyderabad. Open 5am to 11pm Monday to Saturday. Book a free trial class."
+>
+  <PageHeader
+    eyebrow="Visit"
+    title="Come and see the room"
+    standfirst="The quickest way in is a message on WhatsApp — we will book you a free trial class and answer anything before you commit."
+  />
+
+  <section class="section">
+    <div class="container">
+      <div class="actions contact__actions">
+        <a class="btn btn--primary btn--block" href={SITE.cta.href}>Message on WhatsApp</a>
+        <a class="btn btn--secondary btn--block" href={SITE.cta.secondaryHref}>
+          Call {SITE.telephone}
+        </a>
+      </div>
+
+      <dl class="details">
+        <div class="details__row">
+          <dt>Address</dt>
+          <dd>
+            <a href={mapsHref} rel="noopener">
+              {SITE.address.streetAddress}<br />
+              {SITE.address.addressLocality}<br />
+              {SITE.address.addressRegion} {SITE.address.postalCode}
+            </a>
+          </dd>
+        </div>
+        <div class="details__row">
+          <dt>Phone</dt>
+          <dd>
+            <a href={SITE.cta.secondaryHref}>{SITE.telephone}</a><br />
+            <a href={`tel:${SITE.telephoneAlt.replace(/[^+\d]/g, '')}`}>{SITE.telephoneAlt}</a>
+          </dd>
+        </div>
+        <div class="details__row">
+          <dt>Email</dt>
+          <dd><a href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
+        </div>
+        <div class="details__row">
+          <dt>Mon–Sat</dt>
+          <dd class="details__time">5:00 – 23:00</dd>
+        </div>
+        <div class="details__row">
+          <dt>Sunday</dt>
+          <dd class="details__time">5:00 – 18:00</dd>
+        </div>
+        <div class="details__row">
+          <dt>Parking</dt>
+          <dd>Free on site, covered for two-wheelers</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="section section--sunken">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow section-head__eyebrow">Questions</p>
+        <h2 class="section-head__title">Before you come in</h2>
+      </div>
+
+      {
+        FAQS.map((faq) => (
+          <details class="disclosure">
+            <summary class="disclosure__summary">{faq.q}</summary>
+            <div class="disclosure__body">{faq.a}</div>
+          </details>
+        ))
+      }
+    </div>
+  </section>
+</Base>
+
+<style>
+  .contact__actions {
+    margin-top: 0;
+    margin-bottom: var(--space-10);
+  }
+
+  .details {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .details__row {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: var(--space-4);
+    padding-block: var(--space-4);
+    border-top: var(--border-quiet);
+  }
+
+  .details__row dt {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    color: var(--color-text-subtle);
+    padding-top: 0.15em;
+  }
+
+  .details__row dd {
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text);
+  }
+
+  .details__time {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .details__row a {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .details__row a:hover {
+    color: var(--color-text-accent);
+  }
+</style>

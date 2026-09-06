@@ -1,0 +1,253 @@
+---
+import { Image } from 'astro:assets';
+import logoMark from '../assets/photos/logo-mark.png';
+import { SITE, withBase } from '../config/site';
+
+/**
+ * Sticky masthead.
+ *
+ * The current site puts six nav links inline next to the wordmark at mobile
+ * width, so the links sit on top of the logo on every page. Here the bar holds
+ * only the wordmark and one control; the links live in a panel that covers the
+ * column when opened. Nothing can overlap because nothing shares the row.
+ */
+
+interface Props {
+  /** Pathname of the current page, for aria-current. */
+  path: string;
+}
+
+const { path } = Astro.props;
+
+const links = [
+  { href: '/', label: 'Home' },
+  { href: '/about', label: 'About' },
+  { href: '/programs', label: 'Programmes' },
+  { href: '/facilities', label: 'Facilities' },
+  { href: '/membership', label: 'Membership' },
+  { href: '/contact', label: 'Visit' },
+];
+
+/** Compare ignoring the base path and any trailing slash. */
+const current = (href: string): boolean => {
+  const strip = (s: string) => s.replace(/\/+$/, '') || '/';
+  return strip(path) === strip(withBase(href));
+};
+---
+
+<header class="masthead">
+  <div class="masthead__bar">
+    <a class="wordmark" href={withBase('/')} aria-label={`${SITE.name} — home`}>
+      <Image
+        class="wordmark__mark"
+        src={logoMark}
+        alt=""
+        width={72}
+        height={60}
+        densities={[1, 2]}
+        loading="eager"
+      />
+      <span class="wordmark__text">
+        Atlas<span class="wordmark__thin">Fitness</span>
+      </span>
+    </a>
+
+    <button
+      class="menu-toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="site-menu"
+      data-menu-toggle
+    >
+      <span class="visually-hidden">Menu</span>
+      <span class="menu-toggle__bars" aria-hidden="true"><i></i><i></i></span>
+    </button>
+  </div>
+
+  <nav class="menu" id="site-menu" aria-label="Main" data-menu hidden>
+    <ul class="menu__list" role="list">
+      {
+        links.map((link) => (
+          <li>
+            <a
+              class="menu__link"
+              href={withBase(link.href)}
+              aria-current={current(link.href) ? 'page' : undefined}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="menu__foot">
+      <a class="menu__call" href={SITE.cta.secondaryHref}>{SITE.telephone}</a>
+      <p class="menu__hours">Mon–Sat 5am–11pm · Sun 5am–6pm</p>
+    </div>
+  </nav>
+</header>
+
+<style>
+  .masthead {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    background-color: var(--color-surround);
+    border-bottom: var(--border-quiet);
+  }
+
+  .masthead__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    min-height: var(--header-height);
+    padding-inline: var(--layout-gutter);
+    /* Extend under the notch in landscape without shifting the content. */
+    padding-left: max(var(--layout-gutter), env(safe-area-inset-left));
+    padding-right: max(var(--layout-gutter), env(safe-area-inset-right));
+  }
+
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    text-decoration: none;
+    color: var(--color-text);
+    min-height: var(--tap-min);
+  }
+
+  .wordmark__mark {
+    width: 36px;
+    height: auto;
+  }
+
+  .wordmark__text {
+    font-family: var(--font-display);
+    font-weight: var(--weight-black);
+    font-size: var(--text-md);
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  /* The second word steps back so the mark and "Atlas" carry the identity. */
+  .wordmark__thin {
+    color: var(--color-text-accent);
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--tap-min);
+    height: var(--tap-min);
+    margin-right: calc(var(--space-2) * -1);
+    color: var(--color-text);
+  }
+
+  .menu-toggle__bars {
+    display: block;
+    width: 22px;
+  }
+
+  .menu-toggle__bars i {
+    display: block;
+    height: 1.5px;
+    background-color: currentColor;
+    transition: transform var(--duration-base) var(--ease-standard);
+  }
+
+  .menu-toggle__bars i + i {
+    margin-top: 6px;
+  }
+
+  /* Open state: the two bars cross. */
+  .menu-toggle[aria-expanded='true'] .menu-toggle__bars i:first-child {
+    transform: translateY(3.75px) rotate(45deg);
+  }
+
+  .menu-toggle[aria-expanded='true'] .menu-toggle__bars i:last-child {
+    transform: translateY(-3.75px) rotate(-45deg);
+  }
+
+  /* ---- Panel ---- */
+  .menu {
+    border-top: var(--border-quiet);
+    background-color: var(--color-surround);
+    padding: var(--space-6) var(--layout-gutter) var(--space-8);
+  }
+
+  .menu__list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .menu__link {
+    display: block;
+    padding-block: var(--space-4);
+    border-bottom: var(--border-quiet);
+
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .menu__link[aria-current='page'] {
+    color: var(--color-text-accent);
+  }
+
+  .menu__foot {
+    margin-top: var(--space-6);
+  }
+
+  .menu__call {
+    font-size: var(--text-md);
+    font-weight: var(--weight-medium);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .menu__hours {
+    margin-top: var(--space-1);
+    font-size: var(--text-xs);
+    color: var(--color-text-subtle);
+  }
+</style>
+
+<script>
+  // Progressive enhancement: the panel ships open-able only once this runs.
+  // Without JS the markup is still a plain nav list, just hidden -- so the
+  // footer carries the same links as a no-JS fallback.
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+
+  if (toggle && menu) {
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      menu.hidden = !open;
+    };
+
+    toggle.addEventListener('click', () => {
+      setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+    });
+
+    // Escape closes and returns focus to the control that opened it.
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+
+    // Close after following a link to an in-page anchor, where no navigation
+    // happens and the panel would otherwise stay covering the content.
+    menu.addEventListener('click', (event) => {
+      if (event.target instanceof HTMLAnchorElement) setOpen(false);
+    });
+  }
+</script>

@@ -1,0 +1,172 @@
+---
+import { SITE, withBase } from '../config/site';
+
+/**
+ * Footer. Also the no-JS navigation fallback -- the header panel needs script
+ * to open, this list never does.
+ */
+
+const links = [
+  { href: '/about', label: 'About' },
+  { href: '/programs', label: 'Programmes' },
+  { href: '/facilities', label: 'Facilities' },
+  { href: '/membership', label: 'Membership' },
+  { href: '/contact', label: 'Visit' },
+];
+
+const mapsQuery = encodeURIComponent(
+  `${SITE.address.streetAddress}, ${SITE.address.addressLocality}, ${SITE.address.addressRegion} ${SITE.address.postalCode}`,
+);
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container">
+    <p class="eyebrow footer__eyebrow">Atlas Fitness Elite</p>
+
+    <address class="footer__address">
+      <a href={`https://maps.google.com/maps?q=${mapsQuery}`} rel="noopener">
+        {SITE.address.streetAddress}<br />
+        {SITE.address.addressLocality}<br />
+        {SITE.address.addressRegion} {SITE.address.postalCode}
+      </a>
+    </address>
+
+    <ul class="footer__contact" role="list">
+      <li><a href={SITE.cta.secondaryHref}>{SITE.telephone}</a></li>
+      <li><a href={`tel:${SITE.telephoneAlt.replace(/[^+\d]/g, '')}`}>{SITE.telephoneAlt}</a></li>
+      <li><a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
+    </ul>
+
+    <dl class="footer__hours">
+      <div><dt>Mon–Sat</dt><dd>5:00 – 23:00</dd></div>
+      <div><dt>Sunday</dt><dd>5:00 – 18:00</dd></div>
+    </dl>
+
+    <nav class="footer__nav" aria-label="Footer">
+      <ul role="list">
+        {links.map((l) => <li><a href={withBase(l.href)}>{l.label}</a></li>)}
+      </ul>
+    </nav>
+
+    <ul class="footer__social" role="list">
+      <li><a href={SITE.social.instagram} rel="noopener">Instagram</a></li>
+      <li><a href={SITE.social.facebook} rel="noopener">Facebook</a></li>
+    </ul>
+
+    <p class="footer__legal">© {year} {SITE.legalName}. All rights reserved.</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background-color: var(--color-surround);
+    border-top: var(--border-quiet);
+    padding-block: var(--space-12) var(--space-10);
+  }
+
+  .footer__eyebrow {
+    color: var(--color-text-accent);
+    margin-bottom: var(--space-5);
+  }
+
+  .footer__address {
+    font-style: normal;
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-5);
+  }
+
+  .footer__address a {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .footer__address a:hover {
+    color: var(--color-text-accent);
+  }
+
+  .footer__contact {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+  }
+
+  .footer__contact a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    /* Phone and email are the two things someone reaches for; keep them
+       comfortably tappable rather than packed into a dense list. */
+    display: inline-block;
+    padding-block: var(--space-1);
+  }
+
+  .footer__contact a:hover {
+    color: var(--color-text);
+  }
+
+  .footer__hours {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-block: var(--space-5);
+    border-block: var(--border-quiet);
+    margin-bottom: var(--space-6);
+    font-size: var(--text-sm);
+  }
+
+  .footer__hours > div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .footer__hours dt {
+    color: var(--color-text-subtle);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    font-size: var(--text-xs);
+  }
+
+  .footer__hours dd {
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .footer__nav ul,
+  .footer__social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-5);
+  }
+
+  .footer__nav {
+    margin-bottom: var(--space-5);
+  }
+
+  .footer__nav a,
+  .footer__social a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    display: inline-block;
+    padding-block: var(--space-1);
+  }
+
+  .footer__nav a:hover,
+  .footer__social a:hover {
+    color: var(--color-text-accent);
+  }
+
+  .footer__social {
+    padding-top: var(--space-5);
+    border-top: var(--border-quiet);
+  }
+
+  .footer__legal {
+    margin-top: var(--space-8);
+    font-size: var(--text-2xs);
+    color: var(--color-text-subtle);
+  }
+</style>

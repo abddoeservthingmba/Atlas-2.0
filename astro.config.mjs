@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
 
 /** The real domain. Anything else is treated as a preview host. */
 const PRODUCTION_URL = 'https://www.atlasfitnesselite.com';
@@ -41,6 +42,7 @@ const base = process.env.BASE_PATH ?? '/';
 export default defineConfig({
   site: resolveSite(),
   base,
+  integrations: [sitemap()],
   output: 'static',
   trailingSlash: 'ignore',
   server: {

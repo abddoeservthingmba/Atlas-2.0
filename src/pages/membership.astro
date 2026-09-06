@@ -1,0 +1,269 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { SITE } from '../config/site';
+import { PLANS, FEATURED_PLAN_MONTHS, ADD_ONS, formatRupees } from '../data/content';
+
+/**
+ * Twelve terms is a lot of choice at the moment of decision, so the page leads
+ * with three and puts the full ladder behind a disclosure. Nothing is removed
+ * — every term and price the current site publishes is still here, one tap
+ * away, and the monthly equivalent is shown so the ladder can be compared
+ * without arithmetic.
+ */
+const featured = PLANS.filter((p) => FEATURED_PLAN_MONTHS.includes(p.months));
+const rest = PLANS.filter((p) => !FEATURED_PLAN_MONTHS.includes(p.months));
+
+const perMonth = (price: number, months: number) => Math.round(price / months);
+
+/** Cheapest monthly equivalent across the ladder, for the "best value" note. */
+const bestRate = Math.min(...PLANS.map((p) => perMonth(p.price, p.months)));
+---
+
+<Base
+  title="Membership"
+  description="Membership at Atlas Fitness Elite runs from one month to two years, from ₹2,999 + GST. Every plan includes full equipment access and group classes."
+>
+  <PageHeader
+    eyebrow="Membership"
+    title="Pick a term, not a tier"
+    standfirst="Every plan includes full equipment access, group classes, lockers and a fitness assessment. Longer terms add personal training, nutrition support and guest passes."
+  />
+
+  <section class="section">
+    <div class="container">
+      <ul class="plans" role="list">
+        {
+          featured.map((plan) => (
+            <li class={`plan${plan.featured ? ' plan--featured' : ''}`}>
+              {plan.featured && <p class="plan__flag">Most chosen</p>}
+              <h2 class="plan__term">{plan.label}</h2>
+              <p class="plan__price">
+                {formatRupees(plan.price)}
+                <span class="plan__gst">+ GST</span>
+              </p>
+              {/* Redundant on a one-month term, where it restates the total. */}
+              {plan.months > 1 && (
+                <p class="plan__per">
+                  {formatRupees(perMonth(plan.price, plan.months))} a month
+                  {perMonth(plan.price, plan.months) === bestRate && (
+                    <span class="plan__best"> · best rate</span>
+                  )}
+                </p>
+              )}
+
+              <ul class="plan__adds" role="list">
+                {plan.adds.map((add) => (
+                  <li>{add}</li>
+                ))}
+              </ul>
+
+              <a class="btn btn--primary btn--block plan__cta" href={SITE.cta.href}>
+                Enquire about {plan.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <details class="disclosure ladder">
+        <summary class="disclosure__summary">All twelve terms</summary>
+        <div class="disclosure__body">
+          <table class="ladder__table">
+            <caption class="visually-hidden">
+              Every membership term, total price excluding GST, and the
+              equivalent monthly rate.
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Term</th>
+                <th scope="col">Total</th>
+                <th scope="col">Per month</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                PLANS.map((plan) => (
+                  <tr class={plan.featured ? 'is-featured' : undefined}>
+                    <th scope="row">{plan.label}</th>
+                    <td>{formatRupees(plan.price)}</td>
+                    <td>{formatRupees(perMonth(plan.price, plan.months))}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+          <p class="ladder__note">All prices exclude GST. {rest.length} further terms available.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section class="section section--sunken">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow section-head__eyebrow">Add-ons</p>
+        <h2 class="section-head__title">Beyond the membership</h2>
+      </div>
+
+      <ul class="entries entries--compact" role="list">
+        {
+          ADD_ONS.map((item) => (
+            <li class="entry">
+              <h3 class="entry__name">{item.name}</h3>
+              <p class="entry__detail">{item.detail}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="actions">
+        <a class="btn btn--primary btn--block" href={SITE.cta.href}>Book a free trial</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .plans {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+  }
+
+  .plan {
+    padding: var(--space-6);
+    border: var(--border-hairline);
+    border-radius: var(--radius-card);
+  }
+
+  .plan--featured {
+    border-color: var(--color-action);
+  }
+
+  .plan__flag {
+    font-size: var(--text-2xs);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-luxe);
+    text-transform: uppercase;
+    color: var(--color-text-accent);
+    margin-bottom: var(--space-3);
+  }
+
+  .plan__term {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-2);
+  }
+
+  .plan__price {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    font-weight: var(--weight-black);
+    letter-spacing: var(--tracking-tighter);
+    line-height: var(--leading-none);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .plan__gst {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-regular);
+    letter-spacing: var(--tracking-normal);
+    color: var(--color-text-subtle);
+    margin-left: var(--space-2);
+  }
+
+  .plan__per {
+    margin-top: var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--color-text-subtle);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .plan__best {
+    color: var(--color-text-accent);
+  }
+
+  .plan__adds {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+    padding-top: var(--space-5);
+    border-top: var(--border-quiet);
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  /* A hairline tick rather than an emoji or a glyph font — identical on every
+     device, and it takes the brand colour. */
+  .plan__adds li {
+    position: relative;
+    padding-left: var(--space-6);
+  }
+
+  .plan__adds li::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 0.45em;
+    width: 9px;
+    height: 5px;
+    border-left: 1.5px solid var(--color-text-accent);
+    border-bottom: 1.5px solid var(--color-text-accent);
+    transform: rotate(-45deg);
+  }
+
+  .plan__cta {
+    margin-top: var(--space-6);
+  }
+
+  /* ---- Full ladder ---- */
+  .ladder__table {
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ladder__table th,
+  .ladder__table td {
+    padding-block: var(--space-3);
+    border-bottom: var(--border-quiet);
+    text-align: right;
+  }
+
+  .ladder__table thead th {
+    font-size: var(--text-2xs);
+    font-weight: var(--weight-medium);
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    color: var(--color-text-subtle);
+  }
+
+  .ladder__table th:first-child,
+  .ladder__table tbody th {
+    text-align: left;
+    font-weight: var(--weight-medium);
+    color: var(--color-text);
+  }
+
+  .ladder__table td {
+    color: var(--color-text-muted);
+  }
+
+  .ladder__table .is-featured th,
+  .ladder__table .is-featured td {
+    color: var(--color-text-accent);
+  }
+
+  .ladder__note {
+    margin-top: var(--space-4);
+    font-size: var(--text-xs);
+    color: var(--color-text-subtle);
+  }
+</style>

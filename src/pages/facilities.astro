@@ -1,0 +1,96 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { SITE, withBase } from '../config/site';
+import { EQUIPMENT, AMENITIES } from '../data/content';
+import floorImage from '../assets/photos/gym2.jpg';
+import cafeImage from '../assets/photos/cafe-machines.jpg';
+---
+
+<Base
+  title="Facilities"
+  description="Olympic barbells, power racks, cable machines, rowing ergs and a full dumbbell range, plus recovery, locker rooms and climate control."
+>
+  <PageHeader
+    eyebrow="Facilities"
+    title="The room itself"
+    standfirst="Professional-grade equipment, maintained and laid out so you are not queuing for a rack or working around someone else's set."
+  />
+
+  <section class="section--tight">
+    <div class="container">
+      <div class="figure">
+        <Image
+          src={floorImage}
+          alt="Free weights and cardio equipment on the training floor"
+          widths={[480, 960]}
+          sizes="480px"
+          loading="eager"
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow section-head__eyebrow">Equipment</p>
+        <h2 class="section-head__title">What you can train on</h2>
+      </div>
+
+      <ul class="entries entries--compact" role="list">
+        {
+          EQUIPMENT.map((item) => (
+            <li class="entry">
+              <h3 class="entry__name">{item.name}</h3>
+              <p class="entry__detail">{item.detail}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--sunken">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow section-head__eyebrow">Amenities</p>
+        <h2 class="section-head__title">Everything around the training</h2>
+      </div>
+
+      <ul class="entries entries--compact" role="list">
+        {
+          AMENITIES.map((item) => (
+            <li class="entry">
+              <h3 class="entry__name">{item.name}</h3>
+              <p class="entry__detail">{item.detail}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="figure facilities__figure">
+        <Image
+          src={cafeImage}
+          alt="The cafe and refreshment area"
+          widths={[480, 960]}
+          sizes="480px"
+          loading="lazy"
+        />
+      </div>
+
+      <div class="actions">
+        <a class="btn btn--primary btn--block" href={SITE.cta.href}>Book a facility tour</a>
+        <a class="btn btn--secondary btn--block" href={withBase('/membership')}>See membership</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .facilities__figure {
+    aspect-ratio: 3 / 2;
+    margin-top: var(--space-10);
+  }
+</style>

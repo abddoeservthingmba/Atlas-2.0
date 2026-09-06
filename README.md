@@ -51,13 +51,30 @@ layout stretched across a monitor.
 
 ```
 src/
-  config/site.ts       NAP, branding strings, JSON-LD builder. One source of truth.
-  styles/tokens.css    EVERY design decision: colour, type, space, radii, motion.
-  styles/global.css    Reset, base type, app shell, CTA bar, reduced motion.
-  layouts/Base.astro   html shell: meta, OG/Twitter, JSON-LD, CTA bar, Eruda.
-  pages/index.astro    Placeholder section.
-public/                favicon, touch icon, OG image, manifest, robots.
+  config/site.ts        NAP, branding, JSON-LD builder. One source of truth.
+  data/content.ts       Programmes, plans, facilities, FAQ. Real copy, typed.
+  styles/tokens.css     EVERY design decision: colour, type, space, radii, motion.
+  styles/global.css     Reset, base type, app shell, CTA bar, shared components.
+  layouts/Base.astro    html shell: meta, OG/Twitter, JSON-LD, CTA bar, Eruda.
+  components/           Header (menu), Footer, PageHeader.
+  pages/                index, about, programs, facilities, membership, contact
+  pages/robots.txt.ts   Generated — disallows everything on preview hosts.
+  assets/photos/        Client photography, optimised at build by Sharp.
 ```
+
+## Pages
+
+| route | notes |
+| --- | --- |
+| `/` | Hero, positioning, programme preview, floor, three plans, visit |
+| `/about` | Mission, values, promise |
+| `/programs` | All nine programmes |
+| `/facilities` | Equipment and amenities |
+| `/membership` | Three plans up front, all twelve behind a disclosure |
+| `/contact` | NAP, hours, parking, nine FAQs |
+
+The header menu is the only JavaScript on the site. Without it the panel stays
+closed and the footer carries the same links, so navigation still works.
 
 ## Conventions
 

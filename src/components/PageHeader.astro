@@ -1,0 +1,53 @@
+---
+/**
+ * Interior page opener. Type only, no photograph — the home page hero is the
+ * one image-led moment on the site, and repeating it on every page would
+ * spend the effect.
+ */
+
+interface Props {
+  eyebrow: string;
+  title: string;
+  standfirst?: string;
+}
+
+const { eyebrow, title, standfirst } = Astro.props;
+---
+
+<header class="page-header">
+  <div class="container">
+    <p class="eyebrow page-header__eyebrow">{eyebrow}</p>
+    <h1 class="page-header__title">{title}</h1>
+    <hr class="rule" />
+    {standfirst && <p class="page-header__standfirst">{standfirst}</p>}
+  </div>
+</header>
+
+<style>
+  .page-header {
+    padding-block: var(--space-section) var(--space-section-tight);
+    background-image: linear-gradient(
+      to bottom,
+      var(--color-surface-sunken),
+      var(--color-surface)
+    );
+  }
+
+  .page-header__eyebrow {
+    color: var(--color-text-accent);
+    margin-bottom: var(--space-5);
+  }
+
+  .page-header__title {
+    font-size: var(--text-3xl);
+    text-wrap: initial;
+    margin-bottom: var(--space-6);
+  }
+
+  .page-header__standfirst {
+    margin-top: var(--space-6);
+    font-size: var(--text-md);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-muted);
+  }
+</style>
