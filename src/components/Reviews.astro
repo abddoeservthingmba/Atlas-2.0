@@ -1,0 +1,205 @@
+---
+import { REVIEWS, REVIEW_SUMMARY, HAS_REVIEWS } from '../data/reviews';
+
+/**
+ * Google reviews.
+ *
+ * Renders nothing at all when there are no reviews. An empty testimonials
+ * section with a "coming soon" placeholder is worse than no section, and
+ * filling it with invented quotes would be fake social proof on a real
+ * business.
+ *
+ * Deliberately NOT marked up as schema.org Review/AggregateRating. Google's
+ * structured data guidelines say a business should not mark up reviews it has
+ * aggregated from another site as its own — self-serving markup of third-party
+ * reviews risks a manual action. They are shown to readers with attribution
+ * and a link to the listing, which is what the Places terms require.
+ */
+
+interface Props {
+  eyebrow?: string;
+  title?: string;
+}
+
+const { eyebrow = 'Members', title = 'What people say' } = Astro.props;
+
+/** Whole stars only; Google ratings are integers per review. */
+const stars = (n: number) => Array.from({ length: 5 }, (_, i) => i < Math.round(n));
+---
+
+{
+  HAS_REVIEWS && (
+    <section class="section section--sunken reviews">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow section-head__eyebrow">{eyebrow}</p>
+          <h2 class="section-head__title">{title}</h2>
+          {REVIEW_SUMMARY && (
+            <p class="reviews__summary">
+              <span class="reviews__score">{REVIEW_SUMMARY.rating.toFixed(1)}</span>
+              <span class="reviews__stars" aria-hidden="true">
+                {stars(REVIEW_SUMMARY.rating).map((on) => (
+                  <span class={on ? 'star star--on' : 'star'} />
+                ))}
+              </span>
+              <span class="reviews__count">
+                from {REVIEW_SUMMARY.count.toLocaleString('en-IN')} Google ratings
+              </span>
+            </p>
+          )}
+        </div>
+
+        <ul class="reviews__list grid" role="list">
+          {REVIEWS.map((review) => (
+            <li class="review">
+              <p class="reviews__stars review__stars">
+                <span class="visually-hidden">{review.rating} out of 5</span>
+                {stars(review.rating).map((on) => (
+                  <span class={on ? 'star star--on' : 'star'} aria-hidden="true" />
+                ))}
+              </p>
+              <blockquote class="review__quote">
+                <p>{review.text}</p>
+              </blockquote>
+              <p class="review__meta">
+                <span class="review__author">{review.author}</span>
+                {review.when && <span class="review__when">{review.when}</span>}
+              </p>
+            </li>
+          ))}
+        </ul>
+
+        {/* Attribution is a condition of using Places data, not decoration. */}
+        <p class="reviews__attrib">
+          Reviews from Google
+          {REVIEW_SUMMARY?.url && (
+            <>
+              {' · '}
+              <a href={REVIEW_SUMMARY.url} rel="noopener nofollow">
+                Read all on Google
+              </a>
+            </>
+          )}
+        </p>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .reviews__summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+  }
+
+  .reviews__score {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-black);
+    line-height: 1;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .reviews__stars {
+    display: inline-flex;
+    gap: 3px;
+  }
+
+  /* Drawn, not an emoji or an icon font: identical on every device, and it
+     takes the brand gold rather than whatever yellow the platform ships. */
+  .star {
+    width: 13px;
+    height: 13px;
+    background-color: var(--color-divider);
+    clip-path: polygon(
+      50% 0%, 61% 35%, 98% 35%, 68% 57%,
+      79% 91%, 50% 70%, 21% 91%, 32% 57%,
+      2% 35%, 39% 35%
+    );
+  }
+
+  .star--on {
+    background-color: var(--color-premium);
+  }
+
+  .reviews__count {
+    font-size: var(--text-sm);
+    color: var(--color-text-subtle);
+  }
+
+  .reviews__list {
+    --cols-md: 2;
+    --cols-lg: 3;
+    --grid-gap: var(--space-4);
+    /* Stretch, not start: reviews are different lengths, and cards of three
+       different heights read as three objects instead of one set. The meta row
+       is pushed to the bottom of each card with margin-top:auto, so the author
+       names sit on a shared line however long the quote runs. */
+    align-items: stretch;
+  }
+
+  .review {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-6);
+    border: var(--border-quiet);
+    border-radius: var(--radius-card);
+    background-color: var(--color-surface);
+  }
+
+  .review__quote p {
+    /* The reviewer's words, verbatim. Quote marks are added by CSS so the
+       stored text is never altered to make it sit nicely. */
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-muted);
+  }
+
+  .review__quote p::before {
+    content: '\201C';
+  }
+
+  .review__quote p::after {
+    content: '\201D';
+  }
+
+  .review__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-3);
+    margin-top: auto;
+    padding-top: var(--space-4);
+    border-top: var(--border-quiet);
+    font-size: var(--text-xs);
+  }
+
+  .review__author {
+    color: var(--color-text);
+    font-weight: var(--weight-medium);
+  }
+
+  .review__when {
+    color: var(--color-text-subtle);
+  }
+
+  .reviews__attrib {
+    margin-top: var(--space-8);
+    font-size: var(--text-xs);
+    color: var(--color-text-subtle);
+  }
+
+  .reviews__attrib a {
+    color: var(--color-text-premium);
+    text-decoration: none;
+  }
+
+  .reviews__attrib a:hover {
+    color: var(--color-text);
+    text-decoration: underline;
+  }
+</style>

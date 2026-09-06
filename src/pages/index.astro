@@ -4,6 +4,7 @@ import Base from '../layouts/Base.astro';
 import HeroScene from '../components/HeroScene.astro';
 import Showcase from '../components/Showcase.astro';
 import Gallery from '../components/Gallery.astro';
+import Reviews from '../components/Reviews.astro';
 import { SITE, withBase } from '../config/site';
 import { PROGRAMS, PLANS, FEATURED_PLAN_MONTHS, formatRupees } from '../data/content';
 
@@ -119,6 +120,9 @@ const shots = [
       </div>
     </div>
   </section>
+
+  {/* Renders nothing until real reviews exist — see src/data/reviews.ts. */}
+  <Reviews />
 
   <Showcase
     image={markCeiling}

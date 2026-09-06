@@ -162,6 +162,40 @@ that, not placeholder text.
 NAP in `src/config/site.ts` is the real business data, taken from the live
 site's own bundle.
 
+## Google reviews
+
+The section on the home page renders **only when real reviews exist**. It is
+empty by default and there is no placeholder copy anywhere: an invented
+testimonial on a real gym is fake social proof.
+
+Google does not serve reviews in the HTML of a Maps link — the page is a
+JavaScript shell — and scraping them breaches Google's terms. The supported
+route is the Places API:
+
+```sh
+GOOGLE_PLACES_API_KEY=xxx pnpm reviews:fetch     # finds the place, prints its id
+GOOGLE_PLACES_API_KEY=xxx GOOGLE_PLACE_ID=yyy pnpm reviews:fetch   # pin it
+```
+
+Set both in Vercel's environment variables and add `pnpm reviews:fetch` before
+`pnpm build` to refresh on every deploy. Pin the place id so a rename or a
+similarly named gym can never silently swap which business the site quotes.
+
+Notes worth knowing before wiring this up:
+
+- **The API returns at most five reviews.** Google's limit, not a choice here.
+- **Attribution is required**, and the component renders it: "Reviews from
+  Google" plus a link through to the listing.
+- **No `Review` / `AggregateRating` structured data is emitted.** Google's own
+  guidelines say a business should not mark up reviews aggregated from another
+  site as its own; doing it risks a manual action. They are shown to readers,
+  not claimed as first-party data.
+- Reviews refresh only when the site rebuilds. A scheduled Vercel deploy keeps
+  them current if that matters.
+
+Without an API key, `MANUAL_REVIEWS` in `src/data/reviews.ts` takes real text
+pasted verbatim from the listing.
+
 ## Outstanding placeholders
 
 Search the repo for `TODO`. The ones that matter:
