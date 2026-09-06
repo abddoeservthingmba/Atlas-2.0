@@ -21,8 +21,10 @@
      glow-red/-yellow   (removed)         glows read as gaming hardware
      radius up to 24px  2-3px             luxury is sharp; soft corners are
                                           friendly, not expensive
-     Outfit + Inter     Bodoni Moda +     a high-contrast didone is the
-                        Archivo           fashion-house luxury signal
+     Outfit + Inter     Fraunces +        a serif carries the luxury; low
+                        Archivo           stroke contrast keeps it legible
+                                          on a black ground, which a didone
+                                          does not
 
    Reading order:
      1. Primitives   — raw ramps. Named by what they ARE (--ink-700).
@@ -159,10 +161,19 @@
      3. TYPE
 
      Two faces, two jobs:
-       Bodoni Moda — a high-contrast didone. The luxury signal. Used LARGE
-         and SPARINGLY: the wordmark and one statement per section. At 900
-         weight in uppercase it reads powerful, not decorative, which is
-         what keeps it on the right side of the gym/spa line.
+       Fraunces — a variable serif with LOW stroke contrast, used LARGE and
+         SPARINGLY for one statement per section.
+
+         This replaced Bodoni Moda, which was chosen for its luxury signal
+         and failed on readability. A didone's whole character is extreme
+         thick/thin, and light text on a dark ground optically thins
+         (halation) — so its hairlines partly disappeared and the letterforms
+         fragmented. The fix is not a bigger size or a heavier weight, it is
+         a face whose strokes are closer in width. Fraunces keeps the serif
+         warmth and reads cleanly at 900 on black.
+
+         Its optical-size axis means one file is correctly proportioned for
+         both a 72px hero and a 22px plan heading.
        Archivo — a grotesque with slightly condensed proportions. Does all
          the work: body, labels, buttons, nav. More character at small
          sizes than the usual neutral defaults.
@@ -173,7 +184,7 @@
      one size that is wrong on every screen instead of right on three.
      ====================================================================== */
 
-  --font-display: 'Bodoni Moda', 'Didot', 'Bodoni MT', Georgia, 'Times New Roman', serif;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
   --font-sans: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
                'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,

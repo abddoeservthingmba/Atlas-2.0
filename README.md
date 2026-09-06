@@ -117,7 +117,7 @@ corrected (the reasoning is recorded at the top of `tokens.css`):
 | `#ffd700` gold | `#d4af67` antique | pure yellow beside a strong red reads fairground; antique gold reads as struck metal |
 | `glow-red` / `glow-yellow` | removed | glows read as gaming hardware |
 | radii to 24px | 2-3px | luxury is sharp |
-| Outfit + Inter | Bodoni Moda + Archivo | a high-contrast didone is the luxury signal |
+| Outfit + Inter | Fraunces + Archivo | a serif carries the luxury, but low stroke contrast keeps it legible on black — a didone does not |
 
 **Red and gold have different jobs.** Red is *action* — buttons, links, the
 live page. Gold is *distinction* — the medallion, the chosen plan, the best

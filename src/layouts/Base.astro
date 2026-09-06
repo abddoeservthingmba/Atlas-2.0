@@ -117,9 +117,11 @@ const isPreview = new URL(canonical).origin !== new URL(SITE.url).origin;
     <link rel="manifest" href={withBase("/site.webmanifest")} />
 
     <!--
-      FONTS — Bodoni Moda (display) + Archivo (body). See §3 of tokens.css.
-      Only the weights actually used are requested: Bodoni at 700/900 for
-      the display voice, Archivo 400/500/600 for everything functional.
+      FONTS — Fraunces (display) + Archivo (body). See §3 of tokens.css.
+      Only the weights actually used are requested: Fraunces 700/900 for the
+      display voice, Archivo 400/500/600 for everything functional.
+      Fraunces is variable on an optical-size axis, so one file serves the
+      hero and a plan heading and stays correctly proportioned at both.
       TODO: self-host these as woff2 in /public/fonts before launch — it
       removes a third-party round trip and the render-blocking CSS request.
     -->
@@ -127,7 +129,7 @@ const isPreview = new URL(canonical).origin !== new URL(SITE.url).origin;
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,700;6..96,900&family=Archivo:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Archivo:wght@400;500;600&display=swap"
     />
 
     <slot name="head" />
