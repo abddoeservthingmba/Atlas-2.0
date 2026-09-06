@@ -94,29 +94,58 @@ export const SITE = {
   },
 } as const;
 
+/**
+ * Prefix a root-relative path with the configured base path.
+ *
+ * On the production domain the base is '/' and this is a no-op. On a GitHub
+ * Pages project site the base is '/<repo>/', and any hand-written absolute
+ * path ('/favicon.svg') would 404 without this. Astro rewrites the assets it
+ * emits itself; this is for the ones written by hand in templates.
+ */
+export function withBase(path: string): string {
+  const base = import.meta.env.BASE_URL || '/';
+  const left = base.endsWith('/') ? base.slice(0, -1) : base;
+  const right = path.startsWith('/') ? path : `/${path}`;
+  return `${left}${right}`;
+}
+
 /** Absolute URL helper for canonical/OG tags. */
 export function absoluteUrl(path: string, base: string = SITE.url): string {
   return new URL(path, base).href;
 }
 
-/** schema.org HealthClub node. Placeholder values flow through from SITE. */
-export function healthClubSchema(canonical: string): Record<string, unknown> {
+/**
+ * schema.org HealthClub node. Placeholder values flow through from SITE.
+ *
+ * `origin` lets a preview deployment describe itself rather than claiming the
+ * production URLs, so a Pages mirror never emits structured data pointing at
+ * the live domain.
+ */
+export function healthClubSchema(
+  canonical: string,
+  origin: string = SITE.url,
+): Record<string, unknown> {
   const sameAs = Object.values(SITE.social).filter((url) => url.length > 0);
+  // `origin` is the bare host (Astro.site excludes the base path), so the site
+  // root has to be rebuilt through withBase — otherwise a project-site deploy
+  // claims the owner's github.io root instead of its own subpath.
+  const rooted = absoluteUrl(withBase('/'), origin);
+  const root = rooted.endsWith('/') ? rooted.slice(0, -1) : rooted;
 
   return {
     '@context': 'https://schema.org',
     '@type': 'HealthClub',
-    '@id': `${SITE.url}/#healthclub`,
+    '@id': `${root}/#healthclub`,
     name: SITE.name,
     legalName: SITE.legalName,
     description: SITE.description,
     slogan: SITE.tagline,
-    url: SITE.url,
+    url: root,
     telephone: SITE.telephone,
     email: SITE.email,
     priceRange: SITE.priceRange,
-    image: absoluteUrl(SITE.ogImage),
-    logo: absoluteUrl(SITE.ogImage), // TODO: replace with a dedicated logo asset
+    image: absoluteUrl(withBase(SITE.ogImage), origin),
+    logo: absoluteUrl(withBase(SITE.ogImage), origin), // TODO: dedicated logo asset
     address: {
       '@type': 'PostalAddress',
       ...SITE.address,

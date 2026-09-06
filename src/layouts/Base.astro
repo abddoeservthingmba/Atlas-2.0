@@ -1,5 +1,5 @@
 ---
-import { SITE, absoluteUrl, healthClubSchema } from '../config/site';
+import { SITE, absoluteUrl, withBase, healthClubSchema } from '../config/site';
 import '../styles/global.css';
 
 interface Props {
@@ -40,10 +40,17 @@ const pageTitle = title
   : SITE.title;
 
 // Canonical is built from the configured `site` origin, never from the request
-// host, so preview/dev origins never leak into production markup.
-const canonical = absoluteUrl(Astro.url.pathname, SITE.url);
-const socialImage = absoluteUrl(image, SITE.url);
-const jsonLd = schema ? JSON.stringify(healthClubSchema(canonical)) : null;
+// host, so preview/dev origins never leak into production markup. Astro.site
+// reflects astro.config's `site`, which the Pages workflow overrides — so a
+// Pages preview self-references instead of pointing at the production domain.
+const origin = Astro.site?.href ?? SITE.url;
+const canonical = absoluteUrl(Astro.url.pathname, origin);
+const socialImage = absoluteUrl(withBase(image), origin);
+const jsonLd = schema ? JSON.stringify(healthClubSchema(canonical, origin)) : null;
+
+// The GitHub Pages build sets this. A public mirror of the site must never be
+// indexable, or it competes with the real domain for its own content.
+const isPreview = import.meta.env.PUBLIC_SITE_PREVIEW === '1';
 ---
 
 <!doctype html>
@@ -63,7 +70,7 @@ const jsonLd = schema ? JSON.stringify(healthClubSchema(canonical)) : null;
     <meta name="generator" content={Astro.generator} />
 
     {
-      noindex ? (
+      noindex || isPreview ? (
         <meta name="robots" content="noindex, nofollow" />
       ) : (
         <meta name="robots" content="index, follow, max-image-preview:large" />
@@ -98,9 +105,9 @@ const jsonLd = schema ? JSON.stringify(healthClubSchema(canonical)) : null;
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="color-scheme" content="dark" />
 
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="icon" href={withBase("/favicon.svg")} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={withBase("/apple-touch-icon.png")} />
+    <link rel="manifest" href={withBase("/site.webmanifest")} />
 
     <!--
       FONTS — Bodoni Moda (display) + Archivo (body). See §3 of tokens.css.

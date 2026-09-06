@@ -1,0 +1,92 @@
+# Builds the static site and publishes it to GitHub Pages.
+#
+# The site is a project site, so it is served from https://<owner>.github.io/<repo>/
+# rather than the domain root. Astro needs both halves of that URL at build
+# time: SITE_URL for absolute canonical/OG tags, BASE_PATH for asset prefixes.
+# Both are derived from the repository itself so nothing is hard-coded.
+#
+# PUBLIC_SITE_PREVIEW=1 makes every page emit `noindex`, so this public mirror
+# never competes with the production domain in search results.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - claude/atlas-fitness-setup-q5pb7a
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish; queue at most one more.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # `enablement: true` turns Pages on via the API if it is not already,
+      # so the repository needs no manual setup before the first deploy.
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Typecheck
+        run: pnpm check
+
+      - name: Build
+        env:
+          SITE_URL: ${{ steps.pages.outputs.origin }}
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          PUBLIC_SITE_PREVIEW: '1'
+        run: pnpm build
+
+      # Fail loudly here rather than shipping an empty shell to Pages.
+      - name: Verify output
+        run: |
+          test -f dist/index.html || { echo "::error::dist/index.html missing"; exit 1; }
+          grep -q 'Atlas Fitness Elite' dist/index.html \
+            || { echo "::error::rendered text missing from build output"; exit 1; }
+          grep -q 'application/ld+json' dist/index.html \
+            || { echo "::error::JSON-LD missing from build output"; exit 1; }
+          grep -q 'noindex' dist/index.html \
+            || { echo "::error::preview build is not marked noindex"; exit 1; }
+          if grep -q 'eruda' dist/index.html; then
+            echo "::error::eruda leaked into the production build"; exit 1
+          fi
+          echo "Output verified."
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

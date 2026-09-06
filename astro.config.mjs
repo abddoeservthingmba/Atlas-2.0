@@ -1,11 +1,23 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 
-// TODO: replace with the production origin once the domain is pointed at this build.
-export const SITE_URL = 'https://www.atlasfitnesselite.com';
+/**
+ * `site` and `base` are environment-driven so one codebase serves two hosts:
+ *
+ *   local / production   defaults below -> https://www.atlasfitnesselite.com/
+ *   GitHub Pages preview SITE_URL + BASE_PATH set by .github/workflows/deploy.yml
+ *
+ * A GitHub Pages project site is served from a subpath (/<repo>/), so every
+ * absolute asset URL has to carry that prefix. Astro handles its own emitted
+ * assets; anything hand-written in a template must go through withBase() from
+ * src/config/site.ts.
+ */
+const site = process.env.SITE_URL ?? 'https://www.atlasfitnesselite.com';
+const base = process.env.BASE_PATH ?? '/';
 
 export default defineConfig({
-  site: SITE_URL,
+  site,
+  base,
   output: 'static',
   trailingSlash: 'ignore',
   server: {
