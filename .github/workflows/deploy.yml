@@ -1,12 +1,18 @@
 # Builds the static site and publishes it to GitHub Pages.
 #
 # The site is a project site, so it is served from https://<owner>.github.io/<repo>/
-# rather than the domain root. Astro needs both halves of that URL at build
-# time: SITE_URL for absolute canonical/OG tags, BASE_PATH for asset prefixes.
-# Both are derived from the repository itself so nothing is hard-coded.
+# rather than a domain root. Astro needs both halves of that URL at build time:
+# SITE_URL for absolute canonical/OG tags, BASE_PATH for asset prefixes. Both
+# are derived from the GitHub context, so nothing is hard-coded.
 #
 # PUBLIC_SITE_PREVIEW=1 makes every page emit `noindex`, so this public mirror
 # never competes with the production domain in search results.
+#
+# ONE-TIME SETUP: Pages must be enabled by a human before the first deploy --
+# Settings > Pages > Source: "GitHub Actions". GITHUB_TOKEN is not permitted to
+# create the Pages site itself ("Resource not accessible by integration"), so
+# actions/configure-pages is deliberately not used here. The build and its
+# checks run regardless; only the deploy job needs Pages to exist.
 name: Deploy to GitHub Pages
 
 on:
@@ -45,26 +51,32 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # `enablement: true` turns Pages on via the API if it is not already,
-      # so the repository needs no manual setup before the first deploy.
-      - name: Configure Pages
-        id: pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
+      # Derived from the GitHub context rather than actions/configure-pages, so
+      # the build does not depend on Pages already being enabled. github.io
+      # hostnames are lowercase; repository paths keep their original case.
+      - name: Resolve Pages URL
+        id: url
+        run: |
+          owner=$(echo "${GITHUB_REPOSITORY%%/*}" | tr '[:upper:]' '[:lower:]')
+          repo="${GITHUB_REPOSITORY#*/}"
+          echo "origin=https://${owner}.github.io" >> "$GITHUB_OUTPUT"
+          echo "base=/${repo}" >> "$GITHUB_OUTPUT"
+          echo "Building for https://${owner}.github.io/${repo}/"
 
       - name: Typecheck
         run: pnpm check
 
       - name: Build
         env:
-          SITE_URL: ${{ steps.pages.outputs.origin }}
-          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          SITE_URL: ${{ steps.url.outputs.origin }}
+          BASE_PATH: ${{ steps.url.outputs.base }}
           PUBLIC_SITE_PREVIEW: '1'
         run: pnpm build
 
       # Fail loudly here rather than shipping an empty shell to Pages.
       - name: Verify output
+        env:
+          BASE_PATH: ${{ steps.url.outputs.base }}
         run: |
           test -f dist/index.html || { echo "::error::dist/index.html missing"; exit 1; }
           grep -q 'Atlas Fitness Elite' dist/index.html \
@@ -73,6 +85,8 @@ jobs:
             || { echo "::error::JSON-LD missing from build output"; exit 1; }
           grep -q 'noindex' dist/index.html \
             || { echo "::error::preview build is not marked noindex"; exit 1; }
+          grep -q "href=\"${BASE_PATH}/_astro/" dist/index.html \
+            || { echo "::error::assets are not prefixed with ${BASE_PATH}"; exit 1; }
           if grep -q 'eruda' dist/index.html; then
             echo "::error::eruda leaked into the production build"; exit 1
           fi
