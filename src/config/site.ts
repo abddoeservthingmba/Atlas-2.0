@@ -44,10 +44,10 @@ export const SITE = {
   lang: 'en',
 
   /** Default social share image, 1200x630, served from /public. */
-  ogImage: '/og-default.png', // TODO: replace with real brand share image
+  ogImage: '/og-default.png', // TODO: replace with a real brand share image (photography)
   ogImageAlt: 'Atlas Fitness Elite', // TODO: describe the real image
 
-  themeColor: '#0e1013', // TODO: replace with client hex (matches --color-surround)
+  themeColor: '#000000', // matches --color-surround (--ink-1000)
 
   /* ---- NAP ---------------------------------------------------------- */
   telephone: '+1-000-000-0000', // TODO: replace with client phone

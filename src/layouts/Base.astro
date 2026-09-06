@@ -96,25 +96,25 @@ const jsonLd = schema ? JSON.stringify(healthClubSchema(canonical)) : null;
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content={SITE.shortName} />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="color-scheme" content="light" />
+    <meta name="color-scheme" content="dark" />
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
     <!--
-      FONTS
-      Currently the system stack (see --font-sans in tokens.css): zero network
-      cost and good on every phone.
-      TODO: when the brand faces land, self-host the woff2 files in
-      /public/fonts and preload only the weights actually used above the fold:
-
-      <link rel="preload" href="/fonts/brand-700.woff2" as="font"
-            type="font/woff2" crossorigin />
-
-      Then declare @font-face in global.css with `font-display: swap` and point
-      --font-display at the new family.
+      FONTS — Bodoni Moda (display) + Archivo (body). See §3 of tokens.css.
+      Only the weights actually used are requested: Bodoni at 700/900 for
+      the display voice, Archivo 400/500/600 for everything functional.
+      TODO: self-host these as woff2 in /public/fonts before launch — it
+      removes a third-party round trip and the render-blocking CSS request.
     -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,700;6..96,900&family=Archivo:wght@400;500;600&display=swap"
+    />
 
     <slot name="head" />
 

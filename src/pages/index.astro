@@ -1,72 +1,283 @@
 ---
 import Base from '../layouts/Base.astro';
 import { SITE } from '../config/site';
+
+/**
+ * Brand-direction scaffold, not the finished home page. The hero exists to
+ * show the display face at real size; the specimen below it exists so the
+ * palette and type scale can be judged on an actual phone before any page
+ * sections get built on top of them.
+ */
+
+interface Swatch {
+  token: string;
+  hex: string;
+  role: string;
+  /** Text colour to lay over the swatch, so each chip proves its own pairing. */
+  on: string;
+}
+
+const surfaces: readonly Swatch[] = [
+  { token: '--ink-1000', hex: '#000000', role: 'Surround', on: 'var(--color-text-subtle)' },
+  { token: '--ink-900', hex: '#151113', role: 'Column', on: 'var(--color-text)' },
+  { token: '--ink-800', hex: '#241e21', role: 'Raised', on: 'var(--color-text)' },
+  { token: '--ink-600', hex: '#4a4145', role: 'Hairline', on: 'var(--color-text)' },
+];
+
+const reds: readonly Swatch[] = [
+  { token: '--red-400', hex: '#ef4c63', role: 'Text red', on: 'var(--ink-1000)' },
+  { token: '--red-500', hex: '#c8102e', role: 'Primary fill', on: 'var(--ink-0)' },
+  { token: '--red-600', hex: '#a80d26', role: 'Hover', on: 'var(--ink-0)' },
+  { token: '--red-800', hex: '#5e0715', role: 'Oxblood', on: 'var(--ink-0)' },
+];
 ---
 
 <Base title={SITE.tagline} description={SITE.description} schema={true}>
-  <section class="placeholder section">
+  <header class="masthead">
+    <div class="container masthead__inner">
+      <span class="wordmark">Atlas</span>
+      <span class="eyebrow masthead__meta">Elite</span>
+    </div>
+  </header>
+
+  <section class="hero">
     <div class="container">
-      <p class="placeholder__eyebrow">Rebuild in progress</p>
-      <h1 class="placeholder__title">{SITE.name}</h1>
-      <p class="placeholder__lead">{SITE.tagline}</p>
-      <p class="placeholder__body">
-        Shell only. Design tokens, the mobile shell, meta and structured data are
-        wired up; page sections come next.
+      <p class="eyebrow hero__eyebrow">Strength · Conditioning</p>
+      <h1 class="hero__title">Transform your body, transform your life</h1>
+      <hr class="rule" />
+      <p class="hero__lead">
+        A coached strength floor, considered equipment, and a room that stays
+        quiet enough to actually train in.
+      </p>
+    </div>
+  </section>
+
+  <section class="section specimen">
+    <div class="container">
+      <p class="eyebrow">Brand direction</p>
+      <h2 class="specimen__title">Black, red, white</h2>
+      <p class="specimen__note">
+        Scaffold — no page sections built yet. Everything below is a token
+        in <code>tokens.css</code>, so approving a value here changes it
+        everywhere.
       </p>
 
-      <ul class="placeholder__checks" role="list">
-        <li>480px column, dark surround above it</li>
-        <li>Sticky CTA bar clearing the safe area</li>
-        <li>Tokens in <code>src/styles/tokens.css</code></li>
+      <h3 class="specimen__label">Surfaces</h3>
+      <ul class="swatches" role="list">
+        {
+          surfaces.map((s) => (
+            <li class="swatch" style={`background:${s.hex};color:${s.on}`}>
+              <span class="swatch__role">{s.role}</span>
+              <span class="swatch__hex">{s.hex}</span>
+              <span class="swatch__token">{s.token}</span>
+            </li>
+          ))
+        }
       </ul>
+
+      <h3 class="specimen__label">Red</h3>
+      <ul class="swatches" role="list">
+        {
+          reds.map((s) => (
+            <li class="swatch" style={`background:${s.hex};color:${s.on}`}>
+              <span class="swatch__role">{s.role}</span>
+              <span class="swatch__hex">{s.hex}</span>
+              <span class="swatch__token">{s.token}</span>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h3 class="specimen__label">Type</h3>
+      <div class="typespec">
+        <p class="typespec__row display typespec__display">Atlas</p>
+        <p class="typespec__meta">Bodoni Moda 900 · display, used sparingly</p>
+
+        <p class="typespec__row typespec__h3">Coached strength floor</p>
+        <p class="typespec__meta">Archivo 600 · subheads</p>
+
+        <p class="typespec__row typespec__body">
+          Body copy runs in Archivo at 16px with generous leading. Space is
+          doing as much work here as the type is.
+        </p>
+        <p class="typespec__meta">Archivo 400 · body</p>
+
+        <p class="eyebrow">Wide-set label</p>
+        <p class="typespec__meta">Archivo 500 · 0.28em tracking</p>
+      </div>
     </div>
   </section>
 </Base>
 
 <style>
-  .placeholder {
-    /* Fill the column so the surround is obvious on desktop even with
-       almost no content on the page yet. */
-    min-height: 60svh;
-    display: flex;
-    align-items: center;
+  /* ---- Masthead ---- */
+  .masthead {
+    border-bottom: var(--border-quiet);
   }
 
-  .placeholder__eyebrow {
+  .masthead__inner {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    min-height: var(--header-height);
+    padding-block: var(--space-4);
+  }
+
+  .wordmark {
+    font-family: var(--font-display);
+    font-weight: var(--weight-black);
+    font-size: var(--text-lg);
+    letter-spacing: var(--tracking-luxe);
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin-right: calc(var(--tracking-luxe) * -1);
+  }
+
+  .masthead__meta {
+    color: var(--color-text-accent);
+  }
+
+  /* ---- Hero ----
+     Depth comes from a vertical gradient off the sunken tone, never a glow. */
+  .hero {
+    padding-block: var(--space-section-loose) var(--space-section);
+    background-image: linear-gradient(
+      to bottom,
+      var(--color-surface-sunken),
+      var(--color-surface) 70%
+    );
+  }
+
+  .hero__eyebrow {
+    color: var(--color-text-accent);
+    margin-bottom: var(--space-6);
+  }
+
+  .hero__title {
+    /* The didone wants to stack as a solid block, so it gets the tight
+       leading from tokens and no balancing — a ragged right edge here is
+       the point. */
+    text-wrap: initial;
+    margin-bottom: var(--space-6);
+  }
+
+  .rule {
+    border: 0;
+    height: 1px;
+    width: var(--space-16);
+    background-color: var(--color-action);
+    margin-bottom: var(--space-6);
+  }
+
+  .hero__lead {
+    font-size: var(--text-md);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-muted);
+    max-width: 34ch;
+  }
+
+  /* ---- Specimen ---- */
+  .specimen {
+    border-top: var(--border-quiet);
+  }
+
+  .specimen__title {
+    margin-block: var(--space-3) var(--space-4);
+  }
+
+  .specimen__note {
+    font-size: var(--text-sm);
+    color: var(--color-text-subtle);
+    margin-bottom: var(--space-10);
+  }
+
+  .specimen__note code {
+    color: var(--color-text-accent);
+  }
+
+  .specimen__label {
     font-size: var(--text-xs);
     font-weight: var(--weight-semibold);
     letter-spacing: var(--tracking-wider);
     text-transform: uppercase;
     color: var(--color-text-subtle);
-    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: var(--border-quiet);
+    margin-bottom: var(--space-4);
   }
 
-  .placeholder__title {
-    margin-bottom: var(--space-2);
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-px);
+    margin-bottom: var(--space-10);
+    /* The gap is a hairline, so the grid's own background draws the rules
+       between chips — cheaper than a border on each. */
+    background-color: var(--color-divider);
+    border: var(--border-quiet);
   }
 
-  .placeholder__lead {
-    font-size: var(--text-md);
-    color: var(--color-text-muted);
-    margin-bottom: var(--space-6);
-  }
-
-  .placeholder__body {
-    color: var(--color-text-muted);
-    margin-bottom: var(--space-6);
-  }
-
-  .placeholder__checks {
+  .swatch {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-    font-size: var(--text-sm);
-    color: var(--color-text-subtle);
-    border-top: var(--border-hairline);
-    padding-top: var(--space-5);
+    gap: var(--space-1);
+    padding: var(--space-4);
+    min-height: 92px;
+    justify-content: flex-end;
   }
 
-  .placeholder__checks code {
+  .swatch__role {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+  }
+
+  .swatch__hex {
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    opacity: 0.85;
+  }
+
+  .swatch__token {
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    opacity: 0.6;
+  }
+
+  /* ---- Type specimen ---- */
+  .typespec {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .typespec__row {
     color: var(--color-text);
+  }
+
+  .typespec__display {
+    font-size: var(--text-5xl);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tighter);
+  }
+
+  .typespec__h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .typespec__body {
+    font-size: var(--text-base);
+    color: var(--color-text-muted);
+  }
+
+  .typespec__meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    color: var(--color-text-subtle);
+    margin-block: var(--space-2) var(--space-8);
+  }
+
+  .typespec__meta:last-child {
+    margin-bottom: 0;
   }
 </style>

@@ -24,6 +24,10 @@ html {
   text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   scroll-behavior: smooth;
+  /* This site commits to one visual world: black ground, white type, red
+     accent. It does not follow the OS light/dark preference — declaring the
+     scheme keeps form controls and scrollbars in the same world. */
+  color-scheme: dark;
   /* The surround must extend behind the notch and the home indicator. */
   background-color: var(--color-surround);
 }
@@ -39,7 +43,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  /* Never allow a stray wide element to introduce a sideways scroll on a phone. */
+  /* Never allow a stray wide element to introduce a sideways scroll. */
   overflow-x: hidden;
   overscroll-behavior-y: none;
 }
@@ -95,26 +99,45 @@ table {
   scroll-margin-top: var(--space-8);
 }
 
+::selection {
+  background-color: var(--color-action);
+  color: var(--color-text-on-accent);
+}
+
 /* --------------------------------------------------------------------------
    2. BASE TYPOGRAPHY
+
+   The didone (Bodoni Moda) is reserved for h1/h2 — the one or two moments a
+   section is allowed to raise its voice. h3/h4 and everything below run in
+   the grotesque, which is what keeps the display face feeling expensive
+   rather than decorative. Opt in elsewhere with .display.
    -------------------------------------------------------------------------- */
 
 h1,
 h2,
+.display {
+  font-family: var(--font-display);
+  font-weight: var(--weight-black);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tighter);
+  text-wrap: balance;
+  color: var(--color-text);
+}
+
 h3,
 h4 {
-  font-family: var(--font-display);
-  font-weight: var(--weight-bold);
-  line-height: var(--leading-tight);
+  font-family: var(--font-sans);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
   letter-spacing: var(--tracking-tight);
   text-wrap: balance;
   color: var(--color-text);
 }
 
-h1 { font-size: var(--text-3xl); letter-spacing: var(--tracking-tighter); }
-h2 { font-size: var(--text-xl); }
-h3 { font-size: var(--text-lg); line-height: var(--leading-snug); }
-h4 { font-size: var(--text-md); line-height: var(--leading-snug); }
+h1 { font-size: var(--text-4xl); }
+h2 { font-size: var(--text-2xl); }
+h3 { font-size: var(--text-lg); }
+h4 { font-size: var(--text-md); }
 
 p {
   text-wrap: pretty;
@@ -128,6 +151,7 @@ small {
 strong,
 b {
   font-weight: var(--weight-semibold);
+  color: var(--color-text);
 }
 
 a {
@@ -138,7 +162,7 @@ a {
 }
 
 a:hover {
-  color: var(--color-action-hover);
+  color: var(--color-text);
 }
 
 code,
@@ -146,6 +170,22 @@ pre,
 kbd {
   font-family: var(--font-mono);
   font-size: 0.9em;
+}
+
+/* The wide-set uppercase label. Used for section eyebrows and the wordmark. */
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-luxe);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+  /* Wide tracking pushes wrapped lines together; give a wrapped eyebrow
+     room so two lines don't collide. */
+  line-height: var(--leading-snug);
+  /* Wide tracking also adds space after the last letter; pull it back so the
+     label still aligns flush left with the text beneath it. */
+  margin-right: calc(var(--tracking-luxe) * -1);
 }
 
 /* --------------------------------------------------------------------------
@@ -168,7 +208,7 @@ kbd {
   top: var(--space-2);
   z-index: var(--z-toast);
   padding: var(--space-2) var(--space-4);
-  background: var(--color-surface);
+  background: var(--color-surface-raised);
   color: var(--color-text);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-md);
@@ -183,7 +223,7 @@ kbd {
    4. APP SHELL — the layout rule.
 
    The design is a 480px column. On anything wider, the column is centred on
-   a darker surround so desktop reads as a deliberate frame, not a phone
+   a true-black surround so desktop reads as a deliberate frame, not a phone
    layout stretched to fill a monitor.
    -------------------------------------------------------------------------- */
 
@@ -205,15 +245,13 @@ kbd {
   padding-bottom: var(--cta-clearance);
 }
 
-/* Above the column width, lift the column off the surround. */
+/* Above the column width, lift the column off the void. Two near-blacks
+   sitting side by side separate on screen far better than their contrast
+   ratio (1.12:1) suggests, but the shadow and hairline are what actually
+   sell it as a deliberate frame. */
 @media (min-width: 481px) {
   .shell {
     box-shadow: var(--shadow-column);
-  }
-
-  /* A little breathing room top and bottom so the column reads as a card. */
-  body {
-    padding-block: 0;
   }
 }
 
@@ -267,13 +305,13 @@ kbd {
   padding: var(--cta-padding-y) var(--layout-gutter);
   padding-bottom: calc(var(--cta-padding-y) + var(--cta-safe-bottom));
 
-  background-color: var(--color-surface);
-  border-top: var(--border-hairline);
+  background-color: var(--color-surface-sunken);
+  border-top: var(--border-quiet);
   box-shadow: var(--shadow-cta);
 
   /* Frosted only where supported; the solid background above is the fallback. */
-  backdrop-filter: saturate(180%) blur(12px);
-  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  backdrop-filter: saturate(140%) blur(16px);
+  -webkit-backdrop-filter: saturate(140%) blur(16px);
 }
 
 .cta-bar__action {
@@ -290,9 +328,11 @@ kbd {
   color: var(--color-text-on-accent);
   border-radius: var(--radius-button);
 
+  font-family: var(--font-sans);
   font-weight: var(--weight-semibold);
-  font-size: var(--text-base);
-  letter-spacing: var(--tracking-normal);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
   text-decoration: none;
   text-align: center;
 
@@ -316,21 +356,24 @@ kbd {
 
   min-width: var(--tap-comfy);
   min-height: var(--tap-large);
-  padding-inline: var(--space-3);
+  padding-inline: var(--space-4);
 
   border: var(--border-hairline);
   border-radius: var(--radius-button);
 
   color: var(--color-text);
   font-weight: var(--weight-medium);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
   text-decoration: none;
 
   transition: var(--transition-colors);
 }
 
 .cta-bar__secondary:hover {
-  background-color: var(--color-surface-sunken);
+  background-color: var(--color-surface-raised);
+  border-color: var(--color-border-strong);
   color: var(--color-text);
 }
 

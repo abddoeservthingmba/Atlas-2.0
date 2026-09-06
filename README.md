@@ -47,12 +47,36 @@ public/                favicon, touch icon, OG image, manifest, robots.
 - Every page reserves `--cta-clearance` at the bottom so the sticky CTA never
   covers content. `.shell__main` does this already.
 
+## Brand direction
+
+Black, red, white — luxury. Derived from the current site, deliberately
+corrected (the reasoning is recorded at the top of `tokens.css`):
+
+| current site | here | why |
+| --- | --- | --- |
+| `#ff0033` neon red | `#c8102e` crimson | the neon red is the main "supplement store" tell |
+| `#ffd700` gold | removed | a fourth colour dilutes black/red/white |
+| `glow-red` / `glow-yellow` | removed | glows read as gaming hardware |
+| radii to 24px | 2-3px | luxury is sharp |
+| Outfit + Inter | Bodoni Moda + Archivo | a high-contrast didone is the luxury signal |
+
+Two contrast rules that are easy to break:
+
+- `--red-500` is a **fill only** — 3.18:1 as text on the column. White *on*
+  it is 5.88:1, which is why it works as a button.
+- `--red-400` is the **text** red — 5.30:1 on the column.
+
+All text pairings are verified against WCAG AA. Re-check after any palette
+change rather than trusting the numbers in the comments.
+
 ## Outstanding placeholders
 
-Search the repo for `TODO` — the two that matter:
+Search the repo for `TODO` — the ones that matter:
 
-- `src/styles/tokens.css` — brand and accent colour ramps are neutral greys.
 - `src/config/site.ts` — NAP (address, phone, email), hours, social URLs, geo.
+- Fonts are loaded from Google Fonts; self-host as woff2 before launch.
+- `public/og-default.png` and the favicon are generated placeholders, not
+  real brand assets.
 
 ## Reviewing on a phone
 
