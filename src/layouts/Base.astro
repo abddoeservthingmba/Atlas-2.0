@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import { SITE, absoluteUrl, withBase, healthClubSchema } from '../config/site';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -132,6 +133,62 @@ const isPreview = new URL(canonical).origin !== new URL(SITE.url).origin;
       href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Archivo:wght@400;500;600&display=swap"
     />
 
+    <!--
+      Client-side routing, so moving between pages crossfades instead of
+      flashing white. Everything still renders as static HTML and every URL is
+      still a real page — this only changes how the browser gets between them,
+      and it falls back to a normal navigation wherever it is unsupported.
+    -->
+    <ClientRouter />
+
+    <!--
+      MOTION SWITCH — must run before first paint, so it is inline and in the
+      head rather than bundled.
+
+      Setting data-motion="on" is what arms the scroll-reveal styles in
+      global.css §4c. Until it is set, every revealable element is fully
+      visible. That ordering is the whole safety story: no JavaScript, an old
+      browser, a reduced-motion preference or a thrown error all leave the
+      page readable, because the hidden state is never applied in the first
+      place. Never move this to a bundled script — it would run after paint
+      and content would visibly flash in and then hide.
+    -->
+    <script is:inline>
+      (function () {
+        try {
+          var root = document.documentElement;
+          if (!('IntersectionObserver' in window)) return;
+
+          var query = window.matchMedia('(prefers-reduced-motion: reduce)');
+          var apply = function () {
+            if (query.matches) {
+              // Reveal anything mid-flight, then stand down for good.
+              delete root.dataset.motion;
+            } else {
+              root.dataset.motion = 'on';
+            }
+          };
+
+          apply();
+          // Honour the preference changing while the page is open.
+          query.addEventListener('change', apply);
+
+          // DEAD-MAN SWITCH. The styles armed above are undone by a bundled
+          // script that adds .is-in as things scroll into view. If that
+          // bundle never arrives — offline mid-load, a blocked CDN, a parse
+          // error — nothing would ever be revealed and the page would be
+          // blank. So the reveal script raises a flag when it binds, and if
+          // the flag is missing shortly after load we disarm and show
+          // everything. An effect failing must never cost the content.
+          window.setTimeout(function () {
+            if (!root.dataset.revealReady) delete root.dataset.motion;
+          }, 2500);
+        } catch (e) {
+          /* Any failure here simply leaves the site un-animated. */
+        }
+      })();
+    </script>
+
     <slot name="head" />
 
     {
@@ -145,6 +202,12 @@ const isPreview = new URL(canonical).origin !== new URL(SITE.url).origin;
     <a class="skip-link" href="#main">Skip to content</a>
 
     <div class="shell">
+      {/* Texture only — see global.css §4a. Both are inert, unreadable by
+          assistive tech, and sit under the masthead and the CTA bar so the
+          two things that must stay crisp are never filtered. */}
+      <div class="grain" aria-hidden="true"></div>
+      <div class="vignette" aria-hidden="true"></div>
+
       <slot name="header"><Header path={Astro.url.pathname} /></slot>
 
       <main id="main" class="shell__main">
@@ -156,7 +219,14 @@ const isPreview = new URL(canonical).origin !== new URL(SITE.url).origin;
       {
         showCta && (
           <slot name="cta">
-            <div class="cta-bar" role="region" aria-label="Primary actions">
+            {/* Named so the router holds it still while the page beneath it
+                changes, rather than crossfading the bar with itself. */}
+            <div
+              class="cta-bar"
+              role="region"
+              aria-label="Primary actions"
+              transition:name="cta-bar"
+            >
               <a class="cta-bar__action" href={SITE.cta.href}>
                 {SITE.cta.label}
               </a>
@@ -172,6 +242,105 @@ const isPreview = new URL(canonical).origin !== new URL(SITE.url).origin;
         )
       }
     </div>
+
+    <script>
+      /**
+       * Scroll reveal — the runtime half of the contract in global.css §4c.
+       *
+       * The stylesheet decides WHAT is hidden and how it moves. This only
+       * decides WHEN, by adding .is-in as each element crosses into view.
+       * The two lists must stay in step: adding a component here without
+       * adding it to the stylesheet does nothing, and adding it to the
+       * stylesheet without adding it here would hide it permanently.
+       */
+      const SELECTOR = [
+        '.section-head',
+        '.entry',
+        '.plan',
+        '.gallery__item',
+        '.proof__item',
+        '.review',
+        '.disclosure',
+        '.actions',
+        '.visit__address',
+        '.rule',
+        '.hero__body > *',
+        '.showcase__body > *',
+        '.page-header .container > *',
+        '[data-reveal]',
+      ].join(',');
+
+      /* A nine-item grid fully in view would otherwise make the last item wait
+         most of a second. Past the sixth the delay stops reading as sequence
+         and starts reading as lag. */
+      const STAGGER_CAP = 6;
+
+      let observer: IntersectionObserver | null = null;
+
+      /** Give up on the effect and show everything, permanently. */
+      const standDown = () => {
+        delete document.documentElement.dataset.motion;
+      };
+
+      const bind = () => {
+        const root = document.documentElement;
+
+        // Not armed: reduced motion, no IntersectionObserver, or already
+        // stood down. Nothing is hidden, so there is nothing to reveal.
+        if (root.dataset.motion !== 'on') return;
+
+        try {
+          observer?.disconnect();
+
+          observer = new IntersectionObserver(
+            (entries, self) => {
+              for (const entry of entries) {
+                if (!entry.isIntersecting) continue;
+                entry.target.classList.add('is-in');
+                // Once revealed, an element is done — re-animating on the way
+                // back up is the tic that makes these systems feel cheap.
+                self.unobserve(entry.target);
+              }
+            },
+            {
+              /* Fire a little before the element reaches the bottom edge, so
+                 it is already settling by the time it is properly on screen
+                 rather than starting the moment it appears. */
+              rootMargin: '0px 0px -12% 0px',
+              threshold: 0.01,
+            },
+          );
+
+          // Stagger index is per parent, so each group counts from its own
+          // first child rather than from the top of the document.
+          const seen = new Map<Element, number>();
+
+          for (const el of document.querySelectorAll<HTMLElement>(SELECTOR)) {
+            const group = el.parentElement ?? document.body;
+            const index = seen.get(group) ?? 0;
+            seen.set(group, index + 1);
+            el.style.setProperty('--reveal-i', String(Math.min(index, STAGGER_CAP)));
+            observer.observe(el);
+          }
+
+          // Tell the dead-man switch in <head> that the effect is live.
+          root.dataset.revealReady = 'on';
+        } catch {
+          standDown();
+        }
+      };
+
+      // astro:page-load fires on the first load AND after every client-side
+      // navigation. A plain top-level call would only ever run once, leaving
+      // every page after the first with its content hidden and no observer.
+      document.addEventListener('astro:page-load', bind);
+
+      // Release the old document's observer before it is swapped out.
+      document.addEventListener('astro:before-swap', () => {
+        observer?.disconnect();
+        observer = null;
+      });
+    </script>
 
     {
       /* Eruda: on-device console for phone review. Dev only — `import.meta.env.DEV`

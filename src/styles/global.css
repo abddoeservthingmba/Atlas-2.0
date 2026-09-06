@@ -24,12 +24,44 @@ html {
   text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   scroll-behavior: smooth;
+  /* Anchored jumps must clear the sticky masthead, or a linked heading lands
+     underneath it. Uses the condensed height because the header is always
+     condensed by the time a jump happens. */
+  scroll-padding-top: calc(var(--header-height-scrolled) + var(--space-6));
   /* This site commits to one visual world: black ground, white type, red
      accent. It does not follow the OS light/dark preference — declaring the
      scheme keeps form controls and scrollbars in the same world. */
   color-scheme: dark;
+  /* Lets height/width transitions interpolate to intrinsic keywords (`auto`),
+     which is what makes the FAQ disclosures open smoothly to their real
+     height instead of a guessed one. Ignored where unsupported. */
+  interpolate-size: allow-keywords;
   /* The surround must extend behind the notch and the home indicator. */
   background-color: var(--color-surround);
+  /* The scrollbar is part of the room. A default light-grey bar down the edge
+     of a black page is the kind of detail that quietly undoes the rest. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-700) transparent;
+}
+
+/* WebKit needs the long form; same two colours as the standard property. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surround);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--ink-700);
+  border: 3px solid var(--color-surround); /* inset, so the bar reads as thin */
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ink-600);
 }
 
 body {
@@ -237,6 +269,56 @@ kbd {
   isolation: isolate; /* keeps the CTA bar's stacking context local */
 }
 
+/* --------------------------------------------------------------------------
+   4a. MATERIAL — grain and vignette
+
+   Two fixed, non-interactive layers over the whole viewport. They carry no
+   information: delete both and the site loses its texture but nothing else.
+
+   Both sit at --z-sticky (100), which puts them over the content and under
+   the masthead (200) and the CTA bar (300) — so the two things that must
+   stay crisp and readable are never filtered.
+   -------------------------------------------------------------------------- */
+
+.grain,
+.vignette {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sticky);
+  pointer-events: none;
+  /* Never let these enter the accessibility tree or the print output. */
+  user-select: none;
+}
+
+/* Fractal noise as a data URI rather than an image request: it is under 300
+   bytes, it never 404s, and it tiles seamlessly at any size. baseFrequency
+   is high so the grain stays fine rather than turning into visible clouds. */
+.grain {
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: var(--grain-size) var(--grain-size);
+}
+
+.vignette {
+  background: var(--vignette);
+}
+
+/* On a phone the vignette eats usable width and the grain costs a full-screen
+   composite layer for something nobody sees at that size. Both are a
+   large-screen luxury. */
+@media (max-width: 47.99em) {
+  .vignette {
+    display: none;
+  }
+}
+
+@media print {
+  .grain,
+  .vignette {
+    display: none;
+  }
+}
+
 .shell__main {
   flex: 1 1 auto;
   /* Reserve room for the fixed CTA bar so it never covers the last element.
@@ -283,6 +365,109 @@ kbd {
   .grid { --cols: var(--cols-lg, var(--cols-md, var(--cols, 1))); }
 }
 
+/* --------------------------------------------------------------------------
+   4c. SCROLL REVEAL
+
+   Content is staged in as it enters the viewport rather than being there all
+   at once. This is the single biggest difference between a page that reads as
+   a brochure and one that reads as a place.
+
+   THE CONTRACT — read before touching any of this:
+
+   1. The hidden state is gated behind [data-motion='on'] on <html>, which is
+      set by an inline script in <head> BEFORE first paint. So:
+        - JavaScript off      → attribute never set → everything is visible.
+        - prefers-reduced-motion → attribute never set → everything is visible.
+        - Script errors       → attribute is removed  → everything is visible.
+      There is no state in which content is permanently invisible. A reveal
+      system that can hide content from a reader is a bug, not an effect.
+
+   2. The selectors below are the ONLY place the reveal set is declared —
+      the script reads this same list. Adding a component to the animation
+      means adding it here, not adding a class to six pages.
+
+   3. Only opacity, transform and clip-path are animated. All three are
+      compositor properties; none of them trigger layout.
+   -------------------------------------------------------------------------- */
+
+/* The reveal set. Kept as one :is() so the specificity is identical for every
+   member and a component's own styles always win over it. */
+[data-motion='on'] :is(
+  .section-head,
+  .entry,
+  .plan,
+  .gallery__item,
+  .proof__item,
+  .review,
+  .disclosure,
+  .actions,
+  .visit__address,
+  .hero__body > *,
+  .showcase__body > *,
+  .page-header .container > *,
+  [data-reveal]
+) {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-y, var(--reveal-rise)), 0);
+  transition:
+    opacity var(--reveal-duration) var(--ease-luxe),
+    transform var(--reveal-duration) var(--ease-luxe);
+  /* Siblings in a group arrive in sequence. --reveal-i is set by the script
+     from the element's index within its parent. */
+  transition-delay: calc(var(--reveal-i, 0) * var(--reveal-stagger));
+}
+
+[data-motion='on'] :is(
+  .section-head,
+  .entry,
+  .plan,
+  .gallery__item,
+  .proof__item,
+  .review,
+  .disclosure,
+  .actions,
+  .visit__address,
+  .hero__body > *,
+  .showcase__body > *,
+  .page-header .container > *,
+  [data-reveal]
+).is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Display headings get a wipe as well as a rise: the line is uncovered from
+   the baseline up, the way a title card resolves. Reserved for the display
+   face — running it on body copy would read as a template. */
+[data-motion='on'] :is(.hero__title, .page-header__title, .showcase__statement) {
+  --reveal-y: var(--reveal-rise-lg);
+  clip-path: inset(0 0 110% 0);
+  transition:
+    opacity var(--duration-cinema) var(--ease-luxe),
+    transform var(--duration-cinema) var(--ease-luxe),
+    clip-path var(--duration-cinema) var(--ease-luxe);
+}
+
+[data-motion='on'] :is(.hero__title, .page-header__title, .showcase__statement).is-in {
+  /* Opens past the box on every side so descenders, italics and the balanced
+     wrap are never clipped at the end of the transition. */
+  clip-path: inset(-20% -20% -20% -20%);
+}
+
+/* The short rule draws itself in from the left rather than fading. A line
+   that grows reads as drawn; a line that fades reads as loaded. */
+[data-motion='on'] .rule {
+  transform-origin: left center;
+  transform: scaleX(0);
+  opacity: 1;
+  transition: transform var(--duration-cinema) var(--ease-luxe);
+  transition-delay: calc(var(--reveal-i, 0) * var(--reveal-stagger));
+}
+
+[data-motion='on'] .rule.is-in {
+  transform: scaleX(1);
+}
+
 /* Screen-reader-only, still focusable. */
 .visually-hidden:not(:focus):not(:active) {
   position: absolute;
@@ -322,13 +507,34 @@ kbd {
   padding: var(--cta-padding-y) var(--layout-gutter);
   padding-bottom: calc(var(--cta-padding-y) + var(--cta-safe-bottom));
 
-  background-color: var(--color-surface-sunken);
+  background-color: var(--cta-bg);
   border-top: var(--border-quiet);
   box-shadow: var(--shadow-cta);
 
-  /* Frosted only where supported; the solid background above is the fallback. */
-  backdrop-filter: saturate(140%) blur(16px);
-  -webkit-backdrop-filter: saturate(140%) blur(16px);
+  backdrop-filter: var(--header-blur);
+  -webkit-backdrop-filter: var(--header-blur);
+}
+
+/* Without backdrop-filter the translucent bar would let content show through
+   behind the buttons. Those browsers get the solid fallback. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .cta-bar {
+    background-color: var(--color-surface-sunken);
+  }
+}
+
+/* The same gold hairline as the masthead and the footer, on the edge the
+   thumb approaches. */
+.cta-bar::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--hairline-gold);
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .cta-bar__action {
@@ -434,6 +640,38 @@ kbd {
   .cta-bar__action:active {
     transform: none;
   }
+
+  /* Collapsing a duration to 0.01ms makes motion instant, not absent — the
+     image would still jump to 1.045 under the pointer. These effects are
+     removed outright instead. The hover still reads: the colour, border and
+     brightness changes below are all untouched.
+
+     The reveal system needs no rule here: [data-motion] is never set when
+     the OS asks for reduced motion, so nothing is ever hidden or moved. */
+  .figure--interactive:hover img,
+  a:hover > .figure img,
+  li:hover > .figure img,
+  .btn:hover,
+  .btn:active {
+    transform: none;
+  }
+
+  /* The sweep is pure decoration and has no state to convey. */
+  .btn::before {
+    display: none;
+  }
+
+  .entry::before {
+    transform: scaleX(1); /* show the hairline rather than draw it */
+  }
+
+  /* Cross-fading two full pages is significant motion. Reduced motion gets
+     the plain, instant navigation the browser would do without the router. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -448,6 +686,10 @@ kbd {
    button style would start competing for the same attention. */
 
 .btn {
+  position: relative;
+  isolation: isolate; /* keeps the sheen pseudo-element behind the label */
+  overflow: hidden;   /* clips the sweep to the button's own shape */
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -465,7 +707,39 @@ kbd {
   text-decoration: none;
   text-align: center;
 
-  transition: var(--transition-colors), transform var(--duration-fast) var(--ease-standard);
+  transition:
+    var(--transition-colors),
+    transform var(--duration-base) var(--ease-luxe),
+    box-shadow var(--duration-base) var(--ease-luxe);
+}
+
+/* The sheen. A narrow diagonal highlight parked off the left edge that
+   crosses the face on hover. It is a pseudo-element rather than a background
+   animation so the button's own colour transition stays independent. */
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--sheen);
+  /* 200% wide so the gradient's soft ends clear the button completely at
+     both rest and finish — a narrower sweep shows a hard edge parking. */
+  background-size: 200% 100%;
+  background-position: 150% 0;
+  background-repeat: no-repeat;
+  transition: background-position var(--sheen-duration) var(--ease-luxe);
+}
+
+/* Hover only where a pointer can actually hover. On touch this would fire on
+   tap and read as a flicker. */
+@media (hover: hover) {
+  .btn:hover::before {
+    background-position: -50% 0;
+  }
+
+  .btn:hover {
+    transform: translateY(-1px);
+  }
 }
 
 .btn:active {
@@ -482,6 +756,12 @@ kbd {
   color: var(--color-text-on-accent);
 }
 
+@media (hover: hover) {
+  .btn--primary:hover {
+    box-shadow: var(--shadow-md);
+  }
+}
+
 .btn--secondary {
   border: var(--border-hairline);
   color: var(--color-text);
@@ -491,6 +771,12 @@ kbd {
   background-color: var(--color-surface-raised);
   border-color: var(--color-border-strong);
   color: var(--color-text);
+}
+
+/* The secondary button's sheen has to be quieter — it is running over a
+   near-black ground, where the same alpha reads twice as bright. */
+.btn--secondary::before {
+  opacity: 0.4;
 }
 
 .btn--block {
@@ -520,17 +806,25 @@ kbd {
   line-height: var(--leading-relaxed);
 }
 
-/* The short red rule used as a section divider and under hero headlines. */
+/* The short red rule used as a section divider and under hero headlines.
+   Now a gradient rather than a flat fill: it burns in at the centre and
+   fades at both ends, which reads as inlay rather than as a border. */
 .rule {
   border: 0;
   height: 1px;
   width: var(--space-16);
-  background-color: var(--color-action);
+  background: var(--hairline-red);
 }
 
 .rule--full {
   width: 100%;
-  background-color: var(--color-divider);
+  background: var(--hairline-quiet);
+}
+
+/* Gold, for the distinguished moments only — see the note on the gold ramp
+   in tokens.css. Never use this to mark an action. */
+.rule--premium {
+  background: var(--hairline-gold);
 }
 
 /* ---- Image treatment ----
@@ -552,6 +846,30 @@ kbd {
   height: 100%;
   object-fit: cover;
   filter: saturate(0.94) contrast(1.09) brightness(0.98);
+  /* Slow push-in on hover. 1.045 over nearly a second is the difference
+     between a photograph that breathes and one that jumps — anything
+     faster or larger reads as a hover effect rather than as the image
+     being alive. Only applied where a real pointer exists. */
+  transition:
+    transform var(--duration-cinema) var(--ease-luxe),
+    filter var(--duration-slower) var(--ease-luxe);
+  /* Deliberately no will-change here. This rule matches every photograph on
+     the page, and hinting all of them would hold ten full-bleed images on the
+     GPU for the whole session to serve a hover that may never happen. The
+     browser promotes the one being hovered on its own. It is set only on the
+     showcase images, which animate continuously as you scroll. */
+}
+
+/* --interactive marks a figure inside a link or a hoverable card. A figure
+   that is purely illustrative does not move — motion on something that
+   cannot be clicked is a false affordance. */
+@media (hover: hover) {
+  .figure--interactive:hover img,
+  a:hover > .figure img,
+  li:hover > .figure img {
+    transform: scale(1.045);
+    filter: saturate(1) contrast(1.09) brightness(1.05);
+  }
 }
 
 /* A scrim so type can sit over any photograph and stay legible. */
@@ -574,8 +892,35 @@ kbd {
    box maps onto a thing you choose between. */
 
 .entry {
+  position: relative;
   padding-block: var(--space-6);
   border-top: var(--border-quiet);
+}
+
+/* A red hairline that draws across the entry's own top border on hover.
+   The border stays where it is; this rides exactly on top of it, so the
+   row gains emphasis without anything shifting. */
+.entry::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--hairline-red);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--duration-slower) var(--ease-luxe);
+}
+
+@media (hover: hover) {
+  .entry:hover::before {
+    transform: scaleX(1);
+  }
+
+  .entry:hover .entry__name {
+    color: var(--color-text);
+  }
 }
 
 .entry__name {
@@ -583,6 +928,7 @@ kbd {
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-tight);
   margin-bottom: var(--space-2);
+  transition: color var(--duration-base) var(--ease-standard);
 }
 
 .entry__detail {
@@ -615,6 +961,31 @@ kbd {
   border-top: 0;
 }
 
+/* Native <details> animates its own content in browsers that support the
+   ::details-content pseudo-element, which is the only way to get a smooth
+   open without replacing the element with scripted markup and inheriting
+   the job of its accessibility. Where it is unsupported the panel simply
+   snaps open, exactly as it does today. `interpolate-size` (set on :root)
+   is what lets the height animate to `auto` instead of a guessed pixel
+   value that clips long answers. */
+@supports selector(details::details-content) {
+  .disclosure::details-content {
+    block-size: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+      block-size var(--duration-slow) var(--ease-glide),
+      opacity var(--duration-slow) var(--ease-glide),
+      content-visibility var(--duration-slow) allow-discrete;
+    transition-behavior: allow-discrete;
+  }
+
+  .disclosure[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+  }
+}
+
 .disclosure__summary {
   display: flex;
   align-items: flex-start;
@@ -629,6 +1000,13 @@ kbd {
   font-weight: var(--weight-medium);
   color: var(--color-text);
   list-style: none;
+  transition: color var(--duration-base) var(--ease-standard);
+}
+
+@media (hover: hover) {
+  .disclosure__summary:hover {
+    color: var(--color-text-accent);
+  }
 }
 
 .disclosure__summary::-webkit-details-marker {
@@ -730,4 +1108,76 @@ kbd {
   .actions {
     gap: var(--space-4);
   }
+}
+
+/* --------------------------------------------------------------------------
+   9. SECTION EDGING
+
+   Where an alternating band meets the surface, a hairline sits on the seam.
+   Without it the two blacks (--ink-900 and --ink-950) are close enough that
+   the boundary reads as a printing fault rather than a decision.
+   -------------------------------------------------------------------------- */
+
+.section--sunken {
+  position: relative;
+}
+
+.section--sunken::before,
+.section--sunken::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--hairline-quiet);
+  pointer-events: none;
+}
+
+.section--sunken::before { top: 0; }
+.section--sunken::after  { bottom: 0; }
+
+/* --------------------------------------------------------------------------
+   10. PAGE TRANSITIONS
+
+   Astro's ClientRouter swaps the document instead of reloading it, so a
+   navigation can be crossfaded rather than flashed. The whole point is the
+   absence of the white-flash-and-jump that marks a page as a website; done
+   right nobody notices it at all.
+
+   Kept deliberately plain — a slide or a zoom on a full page is the kind of
+   transition that is charming twice and irritating afterwards. The masthead
+   and the CTA bar are given their own names in their components so they hold
+   still while the content beneath them changes.
+
+   The whole block is disabled under prefers-reduced-motion (see §6).
+   -------------------------------------------------------------------------- */
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: vt-fade-out var(--duration-base) var(--ease-in) both;
+}
+
+::view-transition-new(root) {
+  /* The incoming page comes up a few pixels as it fades, which gives the
+     navigation a direction. Longer than the outgoing half so the two never
+     cross-dissolve into a visible grey midpoint. */
+  animation: vt-rise-in var(--duration-slower) var(--ease-luxe) both;
+}
+
+@keyframes vt-fade-out {
+  to { opacity: 0; }
+}
+
+@keyframes vt-rise-in {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* The chrome does not travel with the content. */
+::view-transition-group(masthead),
+::view-transition-group(cta-bar) {
+  animation: none;
 }

@@ -93,8 +93,52 @@ src/
 | `/membership` | Three plans up front, all twelve behind a disclosure |
 | `/contact` | NAP, hours, parking, nine FAQs |
 
-The header menu is the only JavaScript on the site. Without it the panel stays
-closed and the footer carries the same links, so navigation still works.
+## Motion
+
+The site is staged rather than simply displayed. Four systems, all of them
+enhancements that can fail without costing content:
+
+| system | where | falls back to |
+| --- | --- | --- |
+| Scroll reveal | `global.css` §4c + `Base.astro` | everything visible, unmoved |
+| Page transitions | `<ClientRouter />` in `Base.astro` | a normal page load |
+| Masthead condense | `Header.astro` | a solid, full-height bar |
+| Showcase parallax | `Showcase.astro` | a static photograph |
+
+**The reveal contract is the one thing to read before touching any of it.**
+The hidden state lives behind `[data-motion='on']` on `<html>`, set by an
+inline script in `<head>` *before first paint*. Until it is set, nothing is
+hidden. So JavaScript off, no `IntersectionObserver`, `prefers-reduced-motion`,
+or a thrown error all leave the page fully readable — the hidden state is
+never applied in the first place. There is also a dead-man switch: if the
+bundled reveal script does not raise a flag within 2.5s, the attribute is
+removed and everything shows. **An effect failing must never cost the
+content.**
+
+The reveal set is declared in two places that must stay in step — the
+selector list in `global.css` §4c and the matching `SELECTOR` array in
+`Base.astro`. Adding a component to one without the other either does nothing
+or hides it permanently. Nothing needs a class in page markup.
+
+Motion is spent on meaning, not evenly: things you *act on* (buttons, plan
+cards) move and lift; things you only *read* (reviews, list rows) change
+colour only. Parallax is confined to decorative image layers — never type.
+
+Because navigation is now client-side, **every interactive script binds on
+`astro:page-load`, not at module scope.** A module script runs once per
+session, so a top-level binding leaves the feature dead on every page after
+the first. `HeroScene.astro` additionally tears its WebGL context down on
+`astro:before-swap`: a browser hands out only a handful of contexts before
+discarding the oldest, so leaking one per visit is how a long session ends up
+with a black hero.
+
+`prefers-reduced-motion` is honoured throughout, and honoured *properly* —
+effects are removed, not merely shortened. A 0.01ms duration makes motion
+instant, not absent, so hover transforms and the sheen are disabled outright
+rather than sped up.
+
+Without JavaScript the header panel stays closed and the footer carries the
+same links, so navigation still works.
 
 ## Conventions
 
@@ -123,6 +167,21 @@ corrected (the reasoning is recorded at the top of `tokens.css`):
 live page. Gold is *distinction* — the medallion, the chosen plan, the best
 rate. Two loud colours competing for the same job is what made the original
 look cheap.
+
+**Material.** A flat black page reads as an empty div; a black page with
+grain, a vignette and metal hairlines reads as printed matter. Three details
+carry it, all declared in `tokens.css` §7b:
+
+- **Grain** — fractal noise over the viewport at 4.5% (`--grain-opacity`).
+  Felt rather than seen; above ~8% it starts eating text contrast.
+- **Hairlines** — rules that fade out at both ends (`--hairline-gold`,
+  `--hairline-red`) so they read as inlay rather than as a border. Gold
+  closes the masthead, the footer and the CTA bar; red marks sections.
+- **Sheen** — a narrow light sweep across a primary button on hover.
+
+All of it is inert and carries no meaning: delete the lot and the site loses
+its texture and nothing else. The grain and vignette sit *under* the masthead
+and CTA bar, so the two things that must stay crisp are never filtered.
 
 ## Hero scene (WebGL)
 

@@ -75,6 +75,12 @@ const { shots } = Astro.props;
 
   .gallery__figure {
     aspect-ratio: 3 / 4;
+    /* The push-in on hover comes from the shared `li:hover > .figure img` rule
+       in global.css. This is the frame that appears with it: a hairline that
+       resolves out of the dark, so the photograph gains an edge rather than
+       having one drawn around it. */
+    box-shadow: inset 0 0 0 1px transparent;
+    transition: box-shadow var(--duration-slower) var(--ease-luxe);
   }
 
   .gallery__caption {
@@ -82,6 +88,17 @@ const { shots } = Astro.props;
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-wide);
     color: var(--color-text-subtle);
+    transition: color var(--duration-base) var(--ease-standard);
+  }
+
+  @media (hover: hover) {
+    .gallery__item:hover .gallery__figure {
+      box-shadow: var(--ring-premium);
+    }
+
+    .gallery__item:hover .gallery__caption {
+      color: var(--color-text-premium);
+    }
   }
 
   @media (min-width: 48em) {

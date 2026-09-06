@@ -67,9 +67,24 @@ const year = new Date().getFullYear();
 
 <style>
   .footer {
+    position: relative;
     background-color: var(--color-surround);
     border-top: var(--border-quiet);
     padding-block: var(--space-12) var(--space-10);
+  }
+
+  /* The one gold line at the foot of every page. It closes the document the
+     way the masthead's hairline opens it, and it is the last thing the eye
+     touches on the way out — the cheapest possible piece of finish. */
+  .footer::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--hairline-gold);
+    opacity: 0.5;
   }
 
   .footer__eyebrow {
@@ -153,6 +168,7 @@ const year = new Date().getFullYear();
 
   .footer__nav a,
   .footer__social a {
+    position: relative;
     color: var(--color-text-muted);
     text-decoration: none;
     font-size: var(--text-sm);
@@ -160,9 +176,32 @@ const year = new Date().getFullYear();
     padding-block: var(--space-1);
   }
 
+  /* The underline sweeps in from the left instead of appearing. Drawn rather
+     than text-decoration so it can be animated and so it clears descenders. */
+  .footer__nav a::after,
+  .footer__social a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--duration-slower) var(--ease-luxe);
+  }
+
   .footer__nav a:hover,
   .footer__social a:hover {
     color: var(--color-text-accent);
+  }
+
+  @media (hover: hover) {
+    .footer__nav a:hover::after,
+    .footer__social a:hover::after {
+      transform: scaleX(1);
+    }
   }
 
   .footer__social {

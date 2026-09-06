@@ -34,6 +34,7 @@
      5. Radii, borders, elevation
      6. Layout
      7. Motion
+     7b. Material & texture — grain, vignette, hairlines, sheen
      8. Z-index
 
    Components should reference SEMANTIC tokens wherever one exists, so a
@@ -321,7 +322,11 @@
   --tap-comfy: 48px;
   --tap-large: 56px;
 
-  /* Sticky bottom CTA bar */
+  /* Sticky bottom CTA bar.
+     Translucent, so the backdrop blur has something to do — with a fully
+     opaque background the filter is applied to nothing and the bar reads as
+     a solid slab pinned over the page. */
+  --cta-bg:          rgb(10 8 9 / 0.82);
   --cta-height:      68px;
   --cta-padding-y:   var(--space-2);
   --cta-safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -332,6 +337,15 @@
 
   --header-height: 60px;
   --header-height-lg: 84px;
+  /* Once the page has scrolled the masthead condenses and goes translucent.
+     The desktop drop is the one people feel — 84 to 64 hands twenty pixels
+     back to the content without the wordmark ever changing size. */
+  --header-height-scrolled: 56px;
+  --header-height-lg-scrolled: 64px;
+  /* Translucent masthead once scrolled. Solid until then, so the top of the
+     page keeps a true black surround behind the wordmark. */
+  --header-scrolled-bg: rgb(0 0 0 / 0.72);
+  --header-blur: saturate(160%) blur(20px);
 
   /* ======================================================================
      7. MOTION
@@ -342,15 +356,117 @@
   --duration-fast:    150ms;
   --duration-base:    240ms;
   --duration-slow:    420ms;
+  /* Cinematic tier. Reveals and image moves run long and decelerate hard —
+     a 200ms fade reads as a UI state change, a 900ms one reads as staging. */
+  --duration-slower:  720ms;
+  --duration-reveal:  900ms;
+  --duration-cinema: 1400ms;
 
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-out:      cubic-bezier(0, 0, 0.2, 1);
   --ease-in:       cubic-bezier(0.4, 0, 1, 1);
   --ease-spring:   cubic-bezier(0.34, 1.4, 0.64, 1);
+  /* The luxury curve: ~exponential decay. Fast off the mark, then a long
+     glide into place. This single easing is what makes the whole site feel
+     expensive rather than quick. Use it for anything the eye follows. */
+  --ease-luxe:     cubic-bezier(0.16, 1, 0.3, 1);
+  /* For things that must settle without any overshoot (panels, drawers). */
+  --ease-glide:    cubic-bezier(0.22, 0.61, 0.24, 1);
 
   --transition-colors: color var(--duration-fast) var(--ease-standard),
                        background-color var(--duration-fast) var(--ease-standard),
                        border-color var(--duration-fast) var(--ease-standard);
+
+  /* ---- Scroll reveal ---------------------------------------------------
+     The distance an element travels on entrance, and the gap between
+     siblings in a staggered group. The rise is deliberately small: a long
+     travel reads as a template effect, a short one reads as staging.
+     -------------------------------------------------------------------- */
+  --reveal-rise:    18px;
+  --reveal-rise-lg: 28px;
+  --reveal-stagger: 70ms;
+  --reveal-duration: var(--duration-reveal);
+
+  /* ======================================================================
+     7b. MATERIAL & TEXTURE
+
+     A flat black page is cheap; a black page with grain, a vignette and
+     metal hairlines reads as printed matter. None of this is decoration
+     for its own sake — it is what stops large dark areas looking like an
+     empty div. All of it is non-interactive and none of it carries meaning,
+     so it can be dropped entirely without losing information.
+     ====================================================================== */
+
+  /* Film grain over the whole viewport. Kept very low: at 5% it is felt
+     rather than seen, and above ~8% it starts eating text contrast. */
+  --grain-opacity: 0.045;
+  --grain-size:    180px;
+
+  /* Edge vignette. Pulls the eye to the centre column on a wide monitor. */
+  --vignette: radial-gradient(
+    ellipse 120% 80% at 50% 40%,
+    transparent 40%,
+    rgb(0 0 0 / 0.45) 100%
+  );
+
+  /* Struck-metal hairlines. A rule that fades out at both ends reads as
+     inlay; a flat 1px line reads as a border. These are the single most
+     repeated luxury detail on the site. */
+  --hairline-gold: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--gold-600) 22%,
+    var(--gold-300) 50%,
+    var(--gold-600) 78%,
+    transparent 100%
+  );
+  --hairline-red: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--red-700) 25%,
+    var(--red-500) 50%,
+    var(--red-700) 75%,
+    transparent 100%
+  );
+  --hairline-quiet: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--ink-700) 50%,
+    transparent 100%
+  );
+
+  /* The light sweep that crosses a primary button on hover. Angled, narrow
+     and white at low alpha — a wide or bright sweep reads as a game UI. */
+  --sheen: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgb(255 255 255 / 0.16) 48%,
+    rgb(255 255 255 / 0.28) 52%,
+    transparent 80%
+  );
+  --sheen-duration: var(--duration-slower);
+
+  /* Gold leaf wash for the one distinguished surface (the chosen plan).
+     Barely there — the border and the flag do the work; this only warms
+     the ground beneath them. */
+  --wash-premium: linear-gradient(
+    160deg,
+    rgb(212 175 103 / 0.10) 0%,
+    rgb(212 175 103 / 0.03) 38%,
+    transparent 72%
+  );
+  --wash-action: linear-gradient(
+    160deg,
+    rgb(200 16 46 / 0.12) 0%,
+    transparent 65%
+  );
+
+  /* Depth for a surface that lifts on hover. Paired with a 1px translate —
+     shadow alone reads as a sticker, shadow plus movement reads as weight. */
+  --shadow-lift: 0 24px 60px rgb(0 0 0 / 0.7), 0 2px 8px rgb(0 0 0 / 0.4);
+  /* Gold glow is banned as a look, but a gold *edge* is the medallion cue. */
+  --ring-premium: 0 0 0 1px rgb(212 175 103 / 0.35);
+  --ring-action:  0 0 0 1px rgb(239 76 99 / 0.35);
 
   /* ======================================================================
      8. Z-INDEX — the complete stacking contract. No ad-hoc values.
