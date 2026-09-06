@@ -25,12 +25,36 @@ const { eyebrow, title, standfirst } = Astro.props;
 
 <style>
   .page-header {
+    position: relative;
     padding-block: var(--space-section) var(--space-section-tight);
-    background-image: linear-gradient(
-      to bottom,
-      var(--color-surface-sunken),
-      var(--color-surface)
-    );
+    /* Two layers: a faint crimson bloom in the top-left corner where the
+       eyebrow sits, over the existing vertical fade out of the sunken black.
+       The bloom is what stops an interior page opening on a flat field — it
+       reads as light falling into the corner of the room, and at 12% alpha it
+       is well under the threshold where it would start looking like a glow. */
+    background-image:
+      radial-gradient(
+        70% 120% at 0% 0%,
+        rgb(200 16 46 / 0.12) 0%,
+        transparent 62%
+      ),
+      linear-gradient(
+        to bottom,
+        var(--color-surface-sunken),
+        var(--color-surface)
+      );
+  }
+
+  /* Closes the opener against the first section rather than letting two near
+     identical blacks meet with nothing on the seam. */
+  .page-header::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--hairline-quiet);
   }
 
   .page-header__eyebrow {

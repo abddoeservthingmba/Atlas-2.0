@@ -14,6 +14,11 @@ import { SITE, withBase } from '../config/site';
  *
  * One nav, not two: aria-current, link order and the no-JS fallback stay in
  * sync because there is only ever one list to keep correct.
+ *
+ * The bar condenses and goes translucent once the page has scrolled. That is
+ * driven by an IntersectionObserver watching a sentinel at the top of the
+ * document, not by a scroll listener — a scroll handler runs on every frame of
+ * every scroll to answer a question whose value changes twice per page.
  */
 
 interface Props {
@@ -39,7 +44,11 @@ const current = (href: string): boolean => {
 };
 ---
 
-<header class="masthead">
+{/* Watched to know whether the page has scrolled. Absolutely positioned, so
+    it sits at the very top of the shell and costs no layout. */}
+<div class="masthead-sentinel" data-masthead-sentinel aria-hidden="true"></div>
+
+<header class="masthead" data-masthead transition:name="masthead">
   <div class="masthead__bar">
     <a class="wordmark" href={withBase('/')} aria-label={`${SITE.name} — home`}>
       <Image
@@ -68,25 +77,29 @@ const current = (href: string): boolean => {
     </button>
 
     <nav class="menu" id="site-menu" aria-label="Main" data-menu hidden>
-      <ul class="menu__list" role="list">
-        {
-          links.map((link) => (
-            <li>
-              <a
-                class="menu__link"
-                href={withBase(link.href)}
-                aria-current={current(link.href) ? 'page' : undefined}
-              >
-                {link.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
+      {/* The inner wrapper is what the 0fr→1fr grid animation measures. The
+          panel cannot animate its own height without it. */}
+      <div class="menu__inner">
+        <ul class="menu__list" role="list">
+          {
+            links.map((link, i) => (
+              <li class="menu__item" style={`--menu-i:${i}`}>
+                <a
+                  class="menu__link"
+                  href={withBase(link.href)}
+                  aria-current={current(link.href) ? 'page' : undefined}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
 
-      <div class="menu__foot">
-        <a class="menu__call" href={SITE.cta.secondaryHref}>{SITE.telephone}</a>
-        <p class="menu__hours">Mon–Sat 5am–11pm · Sun 5am–6pm</p>
+        <div class="menu__foot" style={`--menu-i:${links.length}`}>
+          <a class="menu__call" href={SITE.cta.secondaryHref}>{SITE.telephone}</a>
+          <p class="menu__hours">Mon–Sat 5am–11pm · Sun 5am–6pm</p>
+        </div>
       </div>
     </nav>
 
@@ -95,12 +108,64 @@ const current = (href: string): boolean => {
 </header>
 
 <style>
+  .masthead-sentinel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    pointer-events: none;
+  }
+
   .masthead {
     position: sticky;
     top: 0;
     z-index: var(--z-header);
     background-color: var(--color-surround);
     border-bottom: var(--border-quiet);
+    transition:
+      background-color var(--duration-slower) var(--ease-luxe),
+      backdrop-filter var(--duration-slower) var(--ease-luxe),
+      box-shadow var(--duration-slower) var(--ease-luxe);
+  }
+
+  /* The gold hairline along the bottom edge. Present at all times but only
+     brought up once the bar is floating over content — at the top of the page
+     the masthead is part of the same black field as the hero, and a lit edge
+     there would draw a line across nothing. */
+  .masthead::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--hairline-gold);
+    opacity: 0;
+    transition: opacity var(--duration-slower) var(--ease-luxe);
+    pointer-events: none;
+  }
+
+  .masthead[data-scrolled]::after {
+    opacity: 0.55;
+  }
+
+  /* Scrolled: translucent, blurred, condensed. The content behind it stays
+     legible through the blur, which is what makes a fixed bar feel like glass
+     over the room rather than a lid on it. */
+  .masthead[data-scrolled] {
+    background-color: var(--header-scrolled-bg);
+    backdrop-filter: var(--header-blur);
+    -webkit-backdrop-filter: var(--header-blur);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Without backdrop-filter the translucent background would let text collide
+     with the content behind it. Those browsers keep the solid bar. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .masthead[data-scrolled] {
+      background-color: var(--color-surround);
+    }
   }
 
   /* Capped and centred like every other row, so the wordmark lines up with the
@@ -119,6 +184,12 @@ const current = (href: string): boolean => {
     /* Clear the notch in landscape without shifting the content. */
     padding-left: max(var(--layout-gutter), env(safe-area-inset-left));
     padding-right: max(var(--layout-gutter), env(safe-area-inset-right));
+
+    transition: min-height var(--duration-slower) var(--ease-luxe);
+  }
+
+  .masthead[data-scrolled] .masthead__bar {
+    min-height: var(--header-height-scrolled);
   }
 
   .wordmark {
@@ -133,6 +204,15 @@ const current = (href: string): boolean => {
   .wordmark__mark {
     width: 36px;
     height: auto;
+    transition: transform var(--duration-slower) var(--ease-luxe);
+  }
+
+  @media (hover: hover) {
+    /* The medallion turns a few degrees under the pointer. Small enough to
+       register as the mark being an object rather than as an animation. */
+    .wordmark:hover .wordmark__mark {
+      transform: rotate(-6deg) scale(1.04);
+    }
   }
 
   .wordmark__text {
@@ -146,6 +226,13 @@ const current = (href: string): boolean => {
 
   .wordmark__thin {
     color: var(--color-text-accent);
+    transition: color var(--duration-base) var(--ease-standard);
+  }
+
+  @media (hover: hover) {
+    .wordmark:hover .wordmark__thin {
+      color: var(--color-premium);
+    }
   }
 
   .menu-toggle {
@@ -167,7 +254,9 @@ const current = (href: string): boolean => {
     display: block;
     height: 1.5px;
     background-color: currentColor;
-    transition: transform var(--duration-base) var(--ease-standard);
+    /* Eased like everything else that the eye follows, and slow enough to read
+       as two bars folding into a cross rather than a glyph swap. */
+    transition: transform var(--duration-slower) var(--ease-luxe);
   }
 
   .menu-toggle__bars i + i {
@@ -189,9 +278,64 @@ const current = (href: string): boolean => {
   .menu {
     flex: 1 0 100%;
     margin-inline: calc(var(--layout-gutter) * -1);
-    padding: var(--space-6) var(--layout-gutter) var(--space-8);
     border-top: var(--border-quiet);
     background-color: var(--color-surround);
+  }
+
+  .menu__inner {
+    padding: var(--space-6) var(--layout-gutter) var(--space-8);
+  }
+
+  /* ---- Enhanced panel ----
+     Set by the script once it takes control. Until then the panel is a plain
+     [hidden] block, which is what a no-JS visitor gets — closed, with the
+     footer carrying the same links.
+
+     The open/close animation is the 0fr→1fr grid-rows technique: it animates
+     to the panel's real height without anyone having to measure it, and it
+     stays correct when the link list or the font changes. */
+  .menu[data-enhanced] {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    opacity: 0;
+    transition:
+      grid-template-rows var(--duration-slower) var(--ease-glide),
+      opacity var(--duration-base) var(--ease-standard),
+      visibility 0s linear var(--duration-slower);
+  }
+
+  .menu[data-enhanced] .menu__inner {
+    /* The grid row is the thing being sized, so the child must be allowed to
+       be clipped to it. */
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .menu[data-enhanced][data-open] {
+    grid-template-rows: 1fr;
+    visibility: visible;
+    opacity: 1;
+    transition:
+      grid-template-rows var(--duration-slower) var(--ease-glide),
+      opacity var(--duration-base) var(--ease-standard),
+      visibility 0s;
+  }
+
+  /* Links arrive in sequence behind the panel opening. --menu-i is set on each
+     item in the template, so the order is authored rather than computed. */
+  .menu[data-enhanced] :is(.menu__item, .menu__foot) {
+    opacity: 0;
+    transform: translateY(-8px);
+    transition:
+      opacity var(--duration-base) var(--ease-luxe),
+      transform var(--duration-base) var(--ease-luxe);
+  }
+
+  .menu[data-enhanced][data-open] :is(.menu__item, .menu__foot) {
+    opacity: 1;
+    transform: none;
+    transition-delay: calc(var(--menu-i, 0) * 45ms + 90ms);
   }
 
   .menu__list {
@@ -201,6 +345,7 @@ const current = (href: string): boolean => {
 
   .menu__link {
     display: block;
+    position: relative;
     padding-block: var(--space-4);
     border-bottom: var(--border-quiet);
 
@@ -242,11 +387,16 @@ const current = (href: string): boolean => {
   /* ------------------------------------------------------------------
      DESKTOP
 
-     The same panel becomes an inline row. `[hidden]` is overridden here
-     deliberately: it reflects the mobile toggle's state, which has no meaning
-     at this width, and the nav must always show.
+     The same panel becomes an inline row. Both [hidden] and the enhanced
+     collapsed state are overridden here deliberately: they reflect the mobile
+     toggle's state, which has no meaning at this width, and the nav must
+     always show.
      ------------------------------------------------------------------ */
   @media (min-width: 64em) {
+    .masthead[data-scrolled] .masthead__bar {
+      min-height: var(--header-height-lg-scrolled);
+    }
+
     .masthead__bar {
       flex-wrap: nowrap;
       min-height: var(--header-height-lg);
@@ -266,13 +416,37 @@ const current = (href: string): boolean => {
     }
 
     .menu,
-    .menu[hidden] {
+    .menu[hidden],
+    .menu[data-enhanced] {
       display: block;
       flex: 1 1 auto;
       margin-inline: 0;
-      padding: 0;
       border-top: 0;
       background: none;
+      /* Undo every part of the collapsed mobile state. */
+      visibility: visible;
+      opacity: 1;
+      transition: none;
+    }
+
+    .menu__inner {
+      padding: 0;
+    }
+
+    /* Matches the specificity of the collapsed mobile rule, which would
+       otherwise still apply here. It has to be undone rather than left
+       harmless: overflow:hidden on the desktop nav row would clip the focus
+       ring, which sits 2px outside each link. */
+    .menu[data-enhanced] .menu__inner {
+      overflow: visible;
+    }
+
+    /* The staggered entrance is a panel behaviour; at this width the links are
+       simply present. */
+    .menu[data-enhanced] :is(.menu__item, .menu__foot) {
+      opacity: 1;
+      transform: none;
+      transition: none;
     }
 
     .menu__list {
@@ -291,14 +465,34 @@ const current = (href: string): boolean => {
       white-space: nowrap;
     }
 
+    /* The underline grows from the left on hover and stays put for the current
+       page. Drawn as a pseudo-element rather than text-decoration so it can be
+       animated and so it clears the descenders. */
+    .menu__link::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      background-color: var(--color-action);
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform var(--duration-slower) var(--ease-luxe);
+    }
+
     .menu__link:hover {
       color: var(--color-text-accent);
     }
 
+    .menu__link:hover::after {
+      transform: scaleX(1);
+    }
+
     /* The current page is marked with a rule as well as colour, so it is not
        carried by hue alone. */
-    .menu__link[aria-current='page'] {
-      box-shadow: 0 1px 0 var(--color-action);
+    .menu__link[aria-current='page']::after {
+      transform: scaleX(1);
     }
 
     .menu__foot {
@@ -313,36 +507,148 @@ const current = (href: string): boolean => {
       padding-inline: var(--space-6);
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* The panel still opens and closes, it just stops sliding. Height is the
+       one thing that must not be animated here: a collapsing grid row under
+       reduced motion is exactly the sort of movement the setting is asking us
+       not to make. */
+    .menu[data-enhanced],
+    .menu[data-enhanced][data-open] {
+      transition: none;
+    }
+
+    .menu[data-enhanced] :is(.menu__item, .menu__foot) {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+
+    .wordmark:hover .wordmark__mark {
+      transform: none;
+    }
+  }
 </style>
 
 <script>
-  // Progressive enhancement. Without this the panel stays closed on mobile and
-  // the footer carries the same links; at desktop CSS shows the nav regardless.
-  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
-  const menu = document.querySelector<HTMLElement>('[data-menu]');
+  /**
+   * Masthead behaviour: the mobile panel, and the scrolled state.
+   *
+   * Everything here is progressive enhancement. Without it the panel stays
+   * closed on mobile and the footer carries the same links; at desktop CSS
+   * shows the nav regardless, and the bar simply never condenses.
+   *
+   * Bound on astro:page-load rather than at module scope, because with
+   * client-side routing a module script runs once for the whole session — a
+   * top-level binding would leave the menu dead on every page after the first.
+   * Document-level listeners are registered once, here at module scope, and
+   * look the current elements up when they fire; re-registering them per
+   * navigation is how you end up with six Escape handlers.
+   */
 
-  if (toggle && menu) {
-    const setOpen = (open: boolean) => {
-      toggle.setAttribute('aria-expanded', String(open));
-      menu.hidden = !open;
-    };
+  let observer: IntersectionObserver | null = null;
 
-    toggle.addEventListener('click', () => {
-      setOpen(toggle.getAttribute('aria-expanded') !== 'true');
-    });
+  const els = () => ({
+    toggle: document.querySelector<HTMLButtonElement>('[data-menu-toggle]'),
+    menu: document.querySelector<HTMLElement>('[data-menu]'),
+    masthead: document.querySelector<HTMLElement>('[data-masthead]'),
+  });
 
-    // Escape closes and returns focus to the control that opened it.
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
-        setOpen(false);
-        toggle.focus();
+  const isOpen = () =>
+    document.querySelector('[data-menu-toggle]')?.getAttribute('aria-expanded') === 'true';
+
+  const setOpen = (open: boolean) => {
+    const { toggle, menu } = els();
+    if (!toggle || !menu) return;
+
+    toggle.setAttribute('aria-expanded', String(open));
+    menu.toggleAttribute('data-open', open);
+
+    /* The page behind an open panel must not scroll under it. Only ever set
+       while the panel is open, and only on mobile — at desktop the panel is
+       an inline row that never opens. */
+    document.body.style.overflow = open ? 'hidden' : '';
+  };
+
+  const bind = () => {
+    const { toggle, menu, masthead } = els();
+
+    if (toggle && menu) {
+      /* Hand the panel over to CSS. [hidden] is removed for good — from here
+         the collapsed state is a style, which is what allows it to animate.
+         A no-JS visitor never reaches this line, so [hidden] stands. */
+      menu.hidden = false;
+      menu.setAttribute('data-enhanced', '');
+      setOpen(false);
+
+      toggle.addEventListener('click', () => setOpen(!isOpen()));
+
+      // Close after an in-page anchor, where no navigation happens and the
+      // panel would otherwise stay covering the content.
+      menu.addEventListener('click', (event) => {
+        if (event.target instanceof HTMLAnchorElement) setOpen(false);
+      });
+    }
+
+    if (masthead) {
+      const sentinel = document.querySelector('[data-masthead-sentinel]');
+      observer?.disconnect();
+
+      if (sentinel) {
+        /* The sentinel is a 1px marker at the very top of the document. While
+           any of it is visible the page is at the top; the moment it leaves,
+           the bar has something underneath it and condenses. Two callbacks per
+           page instead of a handler on every scroll frame. */
+        observer = new IntersectionObserver(
+          (entries) => {
+            const entry = entries[entries.length - 1];
+            if (!entry) return;
+            masthead.toggleAttribute('data-scrolled', !entry.isIntersecting);
+          },
+          { threshold: 0 },
+        );
+        observer.observe(sentinel);
+      } else {
+        // No sentinel (a page supplying its own header slot): leave the bar in
+        // its solid state rather than guessing.
+        masthead.removeAttribute('data-scrolled');
       }
-    });
+    }
+  };
 
-    // Close after an in-page anchor, where no navigation happens and the panel
-    // would otherwise stay covering the content.
-    menu.addEventListener('click', (event) => {
-      if (event.target instanceof HTMLAnchorElement) setOpen(false);
-    });
-  }
+  /* At desktop the panel is an inline row that cannot be open or closed, so
+     the mobile state has to be surrendered on the way across the breakpoint.
+     Without this, opening the menu on a narrow window and then widening it
+     leaves the body scroll-locked with no visible control to unlock it. The
+     query mirrors the `lg` breakpoint in tokens.css. */
+  const desktop = window.matchMedia('(min-width: 64em)');
+  desktop.addEventListener('change', (event) => {
+    if (event.matches) setOpen(false);
+  });
+
+  // Escape closes and returns focus to the control that opened it.
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || !isOpen()) return;
+    setOpen(false);
+    els().toggle?.focus();
+  });
+
+  // A tap outside the panel closes it — the gesture people expect from an
+  // overlay, and the one the original had no answer for.
+  document.addEventListener('click', (event) => {
+    if (!isOpen()) return;
+    const { toggle, menu } = els();
+    const target = event.target as Node;
+    if (menu?.contains(target) || toggle?.contains(target)) return;
+    setOpen(false);
+  });
+
+  document.addEventListener('astro:page-load', bind);
+
+  document.addEventListener('astro:before-swap', () => {
+    observer?.disconnect();
+    observer = null;
+    // The next document starts unlocked, whatever state this one was left in.
+    document.body.style.overflow = '';
+  });
 </script>

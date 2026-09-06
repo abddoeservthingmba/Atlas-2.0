@@ -150,6 +150,19 @@ const stars = (n: number) => Array.from({ length: 5 }, (_, i) => i < Math.round(
     border: var(--border-quiet);
     border-radius: var(--radius-card);
     background-color: var(--color-surface);
+    transition:
+      border-color var(--duration-base) var(--ease-standard),
+      background-color var(--duration-base) var(--ease-standard);
+  }
+
+  /* A review is not an action — it does not lift or move under the pointer the
+     way a plan does. It only warms, which is enough to show the card is a
+     discrete object without implying it can be clicked. */
+  @media (hover: hover) {
+    .review:hover {
+      border-color: var(--color-border);
+      background-color: var(--color-surface-raised);
+    }
   }
 
   .review__quote p {

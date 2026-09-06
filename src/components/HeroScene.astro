@@ -52,18 +52,48 @@ const markUrl = withBase('/brand/atlas-mark-square.png');
 </style>
 
 <script>
-  const canvas = document.querySelector<HTMLCanvasElement>('[data-hero-canvas]');
+  /**
+   * Boots the WebGL layer when the hero nears the viewport.
+   *
+   * Lifecycle matters here in a way it does not for the rest of the site.
+   * With client-side routing this module runs once per session, so the work
+   * is bound to astro:page-load — otherwise the scene would appear on a cold
+   * load of the home page and never again after a navigation back to it.
+   *
+   * Teardown matters more. A WebGL context is a real GPU resource and a
+   * browser will only hand out a handful of them before it starts discarding
+   * the oldest. Leaving one behind on every visit to the home page is how a
+   * long session ends up with a black hero and a console full of context-loss
+   * warnings, so the scene is destroyed before the document is swapped as
+   * well as on pagehide.
+   */
 
-  if (canvas) {
+  let handle: { destroy: () => void } | null = null;
+  let observer: IntersectionObserver | null = null;
+
+  const teardown = () => {
+    handle?.destroy();
+    handle = null;
+    observer?.disconnect();
+    observer = null;
+  };
+
+  const bind = () => {
+    // A previous page's scene, if this is a navigation rather than a load.
+    teardown();
+
+    const canvas = document.querySelector<HTMLCanvasElement>('[data-hero-canvas]');
+    if (!canvas) return; // Not the home page; nothing to do.
+
     const mark = canvas.dataset.mark ?? '/brand/atlas-mark-square.png';
 
     const boot = async () => {
       try {
         const { createHeroScene } = await import('../scripts/hero-scene');
-        const handle = createHeroScene(canvas, mark);
-        if (handle) {
+        const scene = createHeroScene(canvas, mark);
+        if (scene) {
+          handle = scene;
           canvas.setAttribute('data-ready', '');
-          window.addEventListener('pagehide', () => handle.destroy(), { once: true });
         }
       } catch {
         // Enhancement only — leave the photograph as it is.
@@ -72,21 +102,24 @@ const markUrl = withBase('/brand/atlas-mark-square.png');
 
     // Wait until the hero is actually approaching the viewport before pulling
     // three.js down. rootMargin starts it just before it is needed.
-    const io = new IntersectionObserver(
+    observer = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          io.disconnect();
-          if ('requestIdleCallback' in window) {
-            (window as Window & typeof globalThis).requestIdleCallback(() => void boot(), {
-              timeout: 1500,
-            });
-          } else {
-            setTimeout(() => void boot(), 200);
-          }
+        if (!entries.some((e) => e.isIntersecting)) return;
+        observer?.disconnect();
+        if ('requestIdleCallback' in window) {
+          (window as Window & typeof globalThis).requestIdleCallback(() => void boot(), {
+            timeout: 1500,
+          });
+        } else {
+          setTimeout(() => void boot(), 200);
         }
       },
       { rootMargin: '200px' },
     );
-    io.observe(canvas);
-  }
+    observer.observe(canvas);
+  };
+
+  document.addEventListener('astro:page-load', bind);
+  document.addEventListener('astro:before-swap', teardown);
+  window.addEventListener('pagehide', teardown);
 </script>

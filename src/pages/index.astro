@@ -314,6 +314,31 @@ const shots = [
     border: var(--border-hairline);
     border-radius: var(--radius-card);
     background-color: var(--color-surface);
+    transition:
+      border-color var(--duration-base) var(--ease-standard),
+      box-shadow var(--duration-slower) var(--ease-luxe),
+      transform var(--duration-slower) var(--ease-luxe);
+  }
+
+  /* A plan is a thing you are choosing between, so it is allowed to answer the
+     pointer with weight — lifting and gaining a shadow — where a list row only
+     brightens. Movement is reserved for the things you act on. */
+  @media (hover: hover) {
+    .plan:hover {
+      transform: translateY(-4px);
+      border-color: var(--color-border-strong);
+      box-shadow: var(--shadow-lift);
+    }
+
+    .plan--featured:hover {
+      border-color: var(--color-premium);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .plan:hover {
+      transform: none;
+    }
   }
 
   /* Gold marks the chosen plan; the button inside it stays red. Distinction
@@ -321,6 +346,11 @@ const shots = [
      the original site shout. */
   .plan--featured {
     border-color: var(--color-border-premium);
+    /* A gold wash falling from the top-left corner, at a tenth of an alpha.
+       It should never be nameable as a gradient — the job is only to stop the
+       chosen plan sharing exactly the same black as the two beside it. */
+    background-image: var(--wash-premium);
+    box-shadow: var(--ring-premium);
   }
 
   .plan__flag {

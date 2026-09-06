@@ -51,6 +51,8 @@ const {
 
   <div class="container showcase__body">
     {eyebrow && <p class="eyebrow showcase__eyebrow">{eyebrow}</p>}
+    {/* Gold, not red: these bands are distinction, never an action. */}
+    <hr class="rule rule--premium showcase__rule" />
     <p class="showcase__statement">{statement}</p>
   </div>
 </section>
@@ -83,6 +85,42 @@ const {
     height: 100%;
   }
 
+  /* ---- Parallax ----
+     The photograph drifts against the band as it passes, which is what gives
+     these sections depth instead of reading as a static poster.
+
+     Driven by a scroll-driven animation rather than a scroll handler, so it
+     runs off the main thread and costs no JavaScript at all. Where
+     animation-timeline is unsupported the whole block is skipped and the
+     image is simply static — nothing to detect and no fallback to maintain.
+
+     Two rules from the motion guidance are load-bearing here:
+       - Only the decorative layer moves. The type over it never does; parallax
+         on body copy hurts reading and can provoke motion sickness.
+       - The travel is small. ±5% is enough to sell depth; more and the image
+         visibly races the page.
+
+     The image is scaled up first so that a ±5% drift always has cover to move
+     into and can never expose an edge of the frame. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .showcase__media :global(img) {
+        scale: 1.14;
+        animation: showcase-drift linear both;
+        animation-timeline: view();
+        /* Runs across the band's whole pass through the viewport, so the
+           midpoint of the drift lines up with the band being centred. */
+        animation-range: cover 0% cover 100%;
+        will-change: translate;
+      }
+
+      @keyframes showcase-drift {
+        from { translate: 0 -5%; }
+        to   { translate: 0 5%; }
+      }
+    }
+  }
+
   /* Read up from the bottom, where the type sits, and stay off the top of the
      frame so the architecture is still visible. */
   .showcase__media::after {
@@ -107,6 +145,10 @@ const {
   .showcase__eyebrow {
     color: var(--color-text-premium);
     margin-bottom: var(--space-5);
+  }
+
+  .showcase__rule {
+    margin-bottom: var(--space-6);
   }
 
   .showcase__statement {
