@@ -534,9 +534,11 @@ kbd {
 }
 
 /* ---- Image treatment ----
-   Photography is slightly desaturated and darkened so a mixed set of shots --
-   some warm, some cool, some stock -- reads as one commissioned set. This is
-   the single biggest thing making inconsistent source images look deliberate. */
+   Tuned for the client's own night photography. The earlier, heavier grade was
+   written for mixed stock and murdered these: the room is already dark, and
+   pulling saturation down took the red equipment with it -- and that red is a
+   brand asset, not incidental colour. This lifts the black slightly and leaves
+   the red alone, while still holding the set together. */
 
 .figure {
   position: relative;
@@ -549,7 +551,7 @@ kbd {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: saturate(0.72) contrast(1.06) brightness(0.88);
+  filter: saturate(0.94) contrast(1.09) brightness(0.98);
 }
 
 /* A scrim so type can sit over any photograph and stay legible. */

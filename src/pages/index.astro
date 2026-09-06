@@ -2,14 +2,30 @@
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import HeroScene from '../components/HeroScene.astro';
+import Showcase from '../components/Showcase.astro';
+import Gallery from '../components/Gallery.astro';
 import { SITE, withBase } from '../config/site';
 import { PROGRAMS, PLANS, FEATURED_PLAN_MONTHS, formatRupees } from '../data/content';
-import heroImage from '../assets/photos/gym1.jpg';
-import floorImage from '../assets/photos/gym2.jpg';
+
+import heroImage from '../assets/photos/atlas-floor-sign.webp';
+import ceilingLetters from '../assets/photos/atlas-ceiling-letters.webp';
+import markCeiling from '../assets/photos/atlas-mark-ceiling.webp';
+import racks from '../assets/photos/atlas-racks.webp';
+import ledWall from '../assets/photos/atlas-led-wall.webp';
+import machines from '../assets/photos/atlas-machines.webp';
+import entrance from '../assets/photos/atlas-entrance.webp';
+import floorLong from '../assets/photos/atlas-floor-long.webp';
 
 const featuredPlans = PLANS.filter((p) => FEATURED_PLAN_MONTHS.includes(p.months));
-/** Six on the home page; the rest live on /programs. */
 const previewPrograms = PROGRAMS.slice(0, 6);
+
+const shots = [
+  { image: racks, alt: 'Squat racks and lifting platforms under the red ceiling frame', caption: 'The lifting floor' },
+  { image: ledWall, alt: 'Benches beside the illuminated ribbed wall', caption: 'Light walls' },
+  { image: machines, alt: 'Plate-loaded machines along the mirrored wall', caption: 'Plate-loaded' },
+  { image: floorLong, alt: 'The length of the training floor at night', caption: 'The long floor' },
+  { image: entrance, alt: 'The entrance turnstile with face recognition', caption: 'Members-only entry' },
+];
 ---
 
 <Base
@@ -21,7 +37,7 @@ const previewPrograms = PROGRAMS.slice(0, 6);
     <div class="figure figure--scrim hero__media">
       <Image
         src={heroImage}
-        alt="The training floor at Atlas Fitness Elite"
+        alt="The Atlas Fitness Elite training floor beneath the illuminated ATLAS ceiling sign"
         widths={[640, 1024, 1600, 2048]}
         sizes="100vw"
         loading="eager"
@@ -37,25 +53,34 @@ const previewPrograms = PROGRAMS.slice(0, 6);
       <h1 class="hero__title">Transform your body, transform your life</h1>
       <hr class="rule" />
       <p class="hero__lead">
-        A coached strength floor, premium equipment and programmes built around
-        the level you are actually at — not the one a template assumes.
+        A floor built like a private club: black and steel, lit end to end,
+        every machine chosen and every session coached.
       </p>
       <div class="actions">
         <a class="btn btn--primary btn--block" href={SITE.cta.href}>Book a free trial</a>
-        <a class="btn btn--secondary btn--block" href={withBase('/membership')}>See membership</a>
+        <a class="btn btn--secondary btn--block" href={withBase('/facilities')}>See the room</a>
       </div>
     </div>
   </section>
 
-  <section class="section section--sunken">
-    <div class="container">
+  <Showcase
+    image={ceilingLetters}
+    alt="The illuminated ATLAS lettering across the ceiling of the training floor"
+    eyebrow="The room"
+    statement="You feel it before you lift anything."
+    focus="50% 35%"
+  />
+
+  <section class="section">
+    <div class="container container--narrow">
       <div class="section-head">
         <p class="eyebrow section-head__eyebrow">Why Atlas</p>
         <h2 class="section-head__title">Coached, not just opened</h2>
         <p class="section-head__standfirst">
-          Every trainer on the floor holds a national or international
-          certification. Plans are written for you, reviewed as you progress,
-          and adjusted when they stop working.
+          Anyone can rent a room and fill it with equipment. The difference here
+          is the standard of the floor and the people on it — certified coaches,
+          plans written for you, and a room maintained like somewhere you would
+          want to spend an hour a day.
         </p>
       </div>
 
@@ -69,8 +94,8 @@ const previewPrograms = PROGRAMS.slice(0, 6);
           <dd>Nine, from calisthenics to Hyrox</dd>
         </div>
         <div class="proof__item">
-          <dt>Terms</dt>
-          <dd>One month to two years</dd>
+          <dt>Entry</dt>
+          <dd>Members-only, face recognition</dd>
         </div>
         <div class="proof__item">
           <dt>First session</dt>
@@ -79,6 +104,30 @@ const previewPrograms = PROGRAMS.slice(0, 6);
       </dl>
     </div>
   </section>
+
+  <section class="section section--sunken">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow section-head__eyebrow">Inside</p>
+        <h2 class="section-head__title">The floor, at night</h2>
+      </div>
+      <Gallery shots={shots} />
+      <div class="actions">
+        <a class="btn btn--secondary btn--block" href={withBase('/facilities')}>
+          Explore the facilities
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <Showcase
+    image={markCeiling}
+    alt="The Atlas figure carrying a globe, illuminated across the ceiling"
+    eyebrow="The name"
+    statement="Atlas carried the world. You start with the bar."
+    focus="50% 45%"
+    height="tall"
+  />
 
   <section class="section">
     <div class="container">
@@ -109,41 +158,11 @@ const previewPrograms = PROGRAMS.slice(0, 6);
   <section class="section section--sunken">
     <div class="container">
       <div class="section-head">
-        <p class="eyebrow section-head__eyebrow">The floor</p>
-        <h2 class="section-head__title">Equipment worth the trip</h2>
-        <p class="section-head__standfirst">
-          Olympic barbells and bumper plates, power racks, cable machines,
-          rowing ergs and a full dumbbell range — plus a recovery zone, premium
-          locker rooms and climate control.
-        </p>
-      </div>
-
-      <div class="figure home__figure">
-        <Image
-          src={floorImage}
-          alt="Free weights and cardio equipment on the Atlas Fitness Elite floor"
-          widths={[480, 960, 1200]}
-          sizes="(min-width: 64em) 1200px, 100vw"
-          loading="lazy"
-        />
-      </div>
-
-      <div class="actions">
-        <a class="btn btn--secondary btn--block" href={withBase('/facilities')}>
-          Explore the facilities
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container">
-      <div class="section-head">
         <p class="eyebrow section-head__eyebrow">Membership</p>
-        <h2 class="section-head__title">Pick a term, not a tier</h2>
+        <h2 class="section-head__title">Access, on your terms</h2>
         <p class="section-head__standfirst">
-          Every plan includes full equipment access and group classes. Longer
-          terms add personal training, nutrition support and guest passes.
+          Every plan opens the whole floor and every group class. Longer terms
+          add coaching, nutrition and guests.
         </p>
       </div>
 
@@ -176,11 +195,19 @@ const previewPrograms = PROGRAMS.slice(0, 6);
     </div>
   </section>
 
-  <section class="section section--sunken">
-    <div class="container">
+  <Showcase
+    image={entrance}
+    alt="The members-only entrance with face recognition turnstile"
+    eyebrow="Visit"
+    statement="Come and stand in it."
+    focus="50% 55%"
+  />
+
+  <section class="section">
+    <div class="container container--narrow">
       <div class="section-head">
-        <p class="eyebrow section-head__eyebrow">Visit</p>
-        <h2 class="section-head__title">Come and see the room</h2>
+        <p class="eyebrow section-head__eyebrow">Find us</p>
+        <h2 class="section-head__title">Mallapur, Hyderabad</h2>
       </div>
 
       <address class="visit__address">
@@ -202,8 +229,7 @@ const previewPrograms = PROGRAMS.slice(0, 6);
 <style>
   /* ---- Hero ----
      The image and the type are one block: the scrim resolves into the page
-     background, so the headline sits on the photograph without a hard edge
-     between them. */
+     background, so the headline sits on the photograph without a hard edge. */
   .hero {
     position: relative;
   }
@@ -267,11 +293,6 @@ const previewPrograms = PROGRAMS.slice(0, 6);
     text-align: right;
     font-size: var(--text-sm);
     color: var(--color-text);
-  }
-
-  .home__figure {
-    aspect-ratio: 3 / 2;
-    margin-bottom: var(--space-2);
   }
 
   /* ---- Plans ----
@@ -353,11 +374,6 @@ const previewPrograms = PROGRAMS.slice(0, 6);
 
   /* ------------------------------------------------------------------
      TABLET AND DESKTOP
-
-     The phone hero pulls its copy up over the base of the image with a
-     negative margin. That is a single-column technique and does not survive a
-     wide viewport, so at desktop the image becomes a full-bleed backdrop and
-     the copy is laid over it — which is also the more confident composition.
      ------------------------------------------------------------------ */
 
   .proof {
@@ -378,8 +394,7 @@ const previewPrograms = PROGRAMS.slice(0, 6);
     align-items: start;
   }
 
-  /* Four rows here (flag, term, price, per) — no feature list or button on
-     the home page teaser. Same reasoning as the membership page. */
+  /* Four rows (flag, term, price, per). Same subgrid reasoning as membership. */
   @media (min-width: 64em) {
     .plans {
       grid-template-rows: repeat(4, auto);
@@ -408,13 +423,7 @@ const previewPrograms = PROGRAMS.slice(0, 6);
       max-width: 46ch;
     }
 
-    .home__figure {
-      aspect-ratio: 21 / 9;
-    }
-
     .proof__item {
-      /* In a grid each cell owns its own rule, so the label and value stack
-         instead of stretching apart across a wide column. */
       flex-direction: column;
       align-items: flex-start;
       gap: var(--space-2);
@@ -429,7 +438,7 @@ const previewPrograms = PROGRAMS.slice(0, 6);
     .hero {
       display: flex;
       align-items: flex-end;
-      min-height: min(80vh, 46rem);
+      min-height: min(88vh, 52rem);
     }
 
     .hero__media {
@@ -442,12 +451,12 @@ const previewPrograms = PROGRAMS.slice(0, 6);
       height: 100%;
     }
 
-    /* Weighted to the bottom-left, where the copy sits, so the right of the
-       photograph stays visible instead of being flattened by a full scrim. */
+    /* Weighted bottom-left, where the copy sits, so the right of the room stays
+       visible instead of being flattened by a full scrim. */
     .hero__media.figure--scrim::after {
       background:
         linear-gradient(to top, var(--color-surface) 0%, rgb(0 0 0 / 0.15) 55%, rgb(0 0 0 / 0.35) 100%),
-        linear-gradient(to right, rgb(0 0 0 / 0.75) 0%, rgb(0 0 0 / 0.1) 60%);
+        linear-gradient(to right, rgb(0 0 0 / 0.75) 0%, rgb(0 0 0 / 0.1) 62%);
     }
 
     .hero__body {
@@ -457,8 +466,6 @@ const previewPrograms = PROGRAMS.slice(0, 6);
     }
 
     .hero__title {
-      /* Three words a line keeps the didone stacking as a block rather than
-         running out into a thin ribbon of text. */
       max-width: 14ch;
     }
 

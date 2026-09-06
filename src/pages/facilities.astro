@@ -4,8 +4,9 @@ import Base from '../layouts/Base.astro';
 import PageHeader from '../components/PageHeader.astro';
 import { SITE, withBase } from '../config/site';
 import { EQUIPMENT, AMENITIES } from '../data/content';
-import floorImage from '../assets/photos/gym2.jpg';
-import cafeImage from '../assets/photos/cafe-machines.jpg';
+import floorImage from '../assets/photos/atlas-racks.webp';
+import cableImage from '../assets/photos/atlas-cable.webp';
+import ledWall from '../assets/photos/atlas-led-wall.webp';
 ---
 
 <Base
@@ -20,11 +21,11 @@ import cafeImage from '../assets/photos/cafe-machines.jpg';
 
   <section class="section--tight">
     <div class="container">
-      <div class="figure">
+      <div class="figure facilities__hero">
         <Image
           src={floorImage}
-          alt="Free weights and cardio equipment on the training floor"
-          widths={[480, 960, 1200]}
+          alt="Squat racks and lifting platforms under the red ceiling frame"
+          widths={[640, 1024, 1600]}
           sizes="(min-width: 64em) 1200px, 100vw"
           loading="eager"
         />
@@ -70,14 +71,25 @@ import cafeImage from '../assets/photos/cafe-machines.jpg';
         }
       </ul>
 
-      <div class="figure facilities__figure">
-        <Image
-          src={cafeImage}
-          alt="The cafe and refreshment area"
-          widths={[480, 960, 1200]}
-          sizes="(min-width: 64em) 1200px, 100vw"
-          loading="lazy"
-        />
+      <div class="facilities__pair">
+        <div class="figure">
+          <Image
+            src={cableImage}
+            alt="Plate-loaded cable station on the training floor"
+            widths={[400, 720, 1000]}
+            sizes="(min-width: 48em) 45vw, 100vw"
+            loading="lazy"
+          />
+        </div>
+        <div class="figure">
+          <Image
+            src={ledWall}
+            alt="Benches beside the illuminated ribbed wall"
+            widths={[400, 720, 1000]}
+            sizes="(min-width: 48em) 45vw, 100vw"
+            loading="lazy"
+          />
+        </div>
       </div>
 
       <div class="actions">
@@ -97,8 +109,28 @@ import cafeImage from '../assets/photos/cafe-machines.jpg';
     --grid-gap: 0 var(--space-10);
   }
 
-  .facilities__figure {
-    aspect-ratio: 3 / 2;
-    margin-top: var(--space-10);
+  .facilities__hero {
+    aspect-ratio: 4 / 5;
+  }
+
+  .facilities__pair {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: var(--space-12);
+  }
+
+  .facilities__pair .figure {
+    aspect-ratio: 3 / 4;
+  }
+
+  @media (min-width: 48em) {
+    .facilities__hero {
+      aspect-ratio: 16 / 9;
+    }
+
+    .facilities__pair {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-6);
+    }
   }
 </style>

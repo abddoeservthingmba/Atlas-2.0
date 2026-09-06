@@ -1,6 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
 import PageHeader from '../components/PageHeader.astro';
+import Showcase from '../components/Showcase.astro';
+import markCeiling from '../assets/photos/atlas-mark-ceiling.webp';
+import floorLong from '../assets/photos/atlas-floor-long.webp';
 import { SITE, withBase } from '../config/site';
 import { VALUES, PROMISE } from '../data/content';
 ---
@@ -30,6 +33,14 @@ import { VALUES, PROMISE } from '../data/content';
     </div>
   </section>
 
+  <Showcase
+    image={markCeiling}
+    alt="The Atlas figure carrying a globe, illuminated across the ceiling"
+    eyebrow="The name"
+    statement="Atlas carried the world. You start with the bar."
+    focus="50% 45%"
+  />
+
   <section class="section section--sunken">
     <div class="container">
       <div class="section-head">
@@ -49,6 +60,14 @@ import { VALUES, PROMISE } from '../data/content';
       </ul>
     </div>
   </section>
+
+  <Showcase
+    image={floorLong}
+    alt="The length of the training floor at night"
+    eyebrow="The standard"
+    statement="Held to it, every single day."
+    focus="50% 50%"
+  />
 
   <section class="section">
     <div class="container">

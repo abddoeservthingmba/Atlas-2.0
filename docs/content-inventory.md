@@ -109,3 +109,32 @@ Recorded so the rebuild does not inherit them:
 
 Items 3-6 are what the token system already corrects. Items 1 and 2 are
 content/QA issues to confirm with the client.
+
+## Photography
+
+The client supplied photographs of the real room (Sept 2026). These replaced
+the stock imagery entirely — the actual gym is better than anything licensable:
+illuminated ATLAS ceiling signage, LED-ribbed black walls, red plate-loaded
+equipment, a face-recognition turnstile entrance.
+
+In `src/assets/photos/`, all shot at night with the floor empty:
+
+| file | used on |
+| --- | --- |
+| `atlas-floor-sign` | home hero — the ATLAS ceiling sign |
+| `atlas-ceiling-letters` | home showcase |
+| `atlas-mark-ceiling` | home + about showcase — the Atlas figure |
+| `atlas-racks` | facilities hero, gallery |
+| `atlas-led-wall`, `atlas-machines`, `atlas-cable` | gallery, facilities |
+| `atlas-floor-long` | gallery, about showcase |
+| `atlas-entrance` | home + contact showcase |
+
+**Three supplied photographs were deliberately not used.** They show members'
+faces clearly. Publishing a recognisable person needs their written consent,
+which is the client's to obtain — and an empty room at night reads more
+expensive anyway.
+
+The image grade in `global.css` is tuned for these specifically. The earlier,
+heavier grade was written for mixed stock and crushed them: the room is already
+dark, and pulling saturation down took the red equipment with it. That red is a
+brand asset, not incidental colour.
