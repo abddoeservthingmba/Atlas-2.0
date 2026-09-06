@@ -3,7 +3,10 @@
  * social handles. Meta tags and JSON-LD both read from here, so the business
  * details exist in exactly one place.
  *
- * Everything marked TODO is a placeholder awaiting real client data.
+ * The NAP below was lifted from the strings in the current site's own JS
+ * bundle rather than retyped from screenshots, so it matches what the live
+ * site publishes today. It still wants a human check before launch -- see the
+ * TODOs, and the "O Mallapur" note on addressLocality.
  */
 
 export interface PostalAddress {
@@ -34,63 +37,85 @@ export const SITE = {
   title: 'Atlas Fitness Elite',
   titleTemplate: '%s | Atlas Fitness Elite',
 
-  tagline: 'Transform Your Body, Transform Your Life', // TODO: confirm with client
+  tagline: 'Transform Your Body, Transform Your Life',
 
   description:
-    'Atlas Fitness Elite is a strength and conditioning gym offering coached ' +
-    'training, modern equipment and flexible membership options.', // TODO: replace with client copy
+    'Atlas Fitness Elite is a strength and conditioning gym in Mallapur, ' +
+    'Hyderabad, offering coached training, premium equipment and flexible ' +
+    'membership plans.',
 
-  locale: 'en_US', // TODO: confirm locale/region
+  locale: 'en_IN',
   lang: 'en',
 
   /** Default social share image, 1200x630, served from /public. */
   ogImage: '/og-default.png', // TODO: replace with a real brand share image (photography)
-  ogImageAlt: 'Atlas Fitness Elite', // TODO: describe the real image
+  ogImageAlt: 'Atlas Fitness Elite',
 
   themeColor: '#000000', // matches --color-surround (--ink-1000)
 
-  /* ---- NAP ---------------------------------------------------------- */
-  telephone: '+1-000-000-0000', // TODO: replace with client phone
-  email: 'hello@atlasfitnesselite.com', // TODO: replace with client email
+  /* ---- NAP ----------------------------------------------------------
+     Verified against the live site's bundle. Both numbers are published;
+     the first is the one used for calls, WhatsApp and the sticky CTA.
+     -------------------------------------------------------------------- */
+  telephone: '+91-99882-29441',
+  telephoneAlt: '+91-83175-29757',
+  /** Digits only, for tel: and wa.me links. */
+  telephoneDigits: '919988229441',
+  email: 'atlasfitnesselite@gmail.com',
 
   address: {
-    streetAddress: '000 Placeholder Street', // TODO: replace with client address
-    addressLocality: 'City', // TODO
-    addressRegion: 'ST', // TODO
-    postalCode: '00000', // TODO
-    addressCountry: 'US', // TODO
+    streetAddress: '3-4-98/4/204, New Narsina Nagar',
+    // The live site renders this as "O Mallapur" in one place and "Mallapur"
+    // in its own Google Maps query. "Mallapur" is what actually resolves, so
+    // it wins here. TODO: confirm the intended spelling with the client.
+    addressLocality: 'Mallapur, Hyderabad',
+    addressRegion: 'Telangana',
+    postalCode: '500076',
+    addressCountry: 'IN',
   } satisfies PostalAddress,
 
-  /** TODO: replace with the real coordinates of the gym. */
+  /**
+   * TODO: replace with the real coordinates. The current site links to a Maps
+   * query rather than a pinned location, so it carries no lat/long to copy.
+   * Zeroes are deliberately obvious rather than a plausible-looking guess.
+   */
   geo: {
     latitude: 0,
     longitude: 0,
   },
 
-  /** TODO: replace with real staffed hours. */
+  /** Mon-Sat 5am-11pm, Sun 5am-6pm, per the live site. */
   openingHours: [
-    { days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], opens: '05:00', closes: '22:00' },
-    { days: ['Saturday', 'Sunday'], opens: '07:00', closes: '20:00' },
+    {
+      days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      opens: '05:00',
+      closes: '23:00',
+    },
+    { days: ['Sunday'], opens: '05:00', closes: '18:00' },
   ] satisfies readonly OpeningHours[],
 
-  priceRange: '$$', // TODO: confirm
+  currency: 'INR',
+  /** Memberships run 2,999-55,999 INR; the plans page carries the detail. */
+  priceRange: '₹₹',
 
-  /** TODO: replace with real profile URLs. Empty entries are omitted from JSON-LD. */
   social: {
-    instagram: '',
-    facebook: '',
+    instagram: 'https://instagram.com/atlasfitnesselite',
+    facebook: 'https://facebook.com/atlasfitnesselite',
     tiktok: '',
     youtube: '',
   },
 
-  twitterHandle: '', // TODO: e.g. '@atlasfitness' — omitted from meta when blank
+  twitterHandle: '', // no X/Twitter presence found; omitted from meta when blank
 
-  /* ---- Primary conversion ------------------------------------------- */
+  /* ---- Primary conversion -------------------------------------------
+     The current site's main action is a WhatsApp enquiry, which suits an
+     Indian mobile audience better than a form. Kept as the primary CTA.
+     -------------------------------------------------------------------- */
   cta: {
-    label: 'Start free trial', // TODO: confirm the real primary CTA
-    href: '#join', // TODO: point at the real signup destination
+    label: 'Book free trial', // TODO: confirm wording with client
+    href: 'https://wa.me/919988229441?text=Hi%21%20I%27m%20interested%20in%20joining%20Atlas%20Fitness%20Elite',
     secondaryLabel: 'Call',
-    secondaryHref: 'tel:+10000000000', // TODO: keep in sync with SITE.telephone
+    secondaryHref: 'tel:+919988229441',
   },
 } as const;
 
@@ -115,11 +140,11 @@ export function absoluteUrl(path: string, base: string = SITE.url): string {
 }
 
 /**
- * schema.org HealthClub node. Placeholder values flow through from SITE.
+ * schema.org HealthClub node.
  *
  * `origin` lets a preview deployment describe itself rather than claiming the
- * production URLs, so a Pages mirror never emits structured data pointing at
- * the live domain.
+ * production URLs, so a Pages or Vercel mirror never emits structured data
+ * pointing at the live domain.
  */
 export function healthClubSchema(
   canonical: string,
@@ -144,17 +169,24 @@ export function healthClubSchema(
     telephone: SITE.telephone,
     email: SITE.email,
     priceRange: SITE.priceRange,
+    currenciesAccepted: SITE.currency,
     image: absoluteUrl(withBase(SITE.ogImage), origin),
     logo: absoluteUrl(withBase(SITE.ogImage), origin), // TODO: dedicated logo asset
     address: {
       '@type': 'PostalAddress',
       ...SITE.address,
     },
-    geo: {
-      '@type': 'GeoCoordinates',
-      latitude: SITE.geo.latitude,
-      longitude: SITE.geo.longitude,
-    },
+    // Omitted entirely until real coordinates exist: publishing 0,0 would
+    // place the gym in the Atlantic, which is worse than saying nothing.
+    ...(SITE.geo.latitude !== 0 || SITE.geo.longitude !== 0
+      ? {
+          geo: {
+            '@type': 'GeoCoordinates',
+            latitude: SITE.geo.latitude,
+            longitude: SITE.geo.longitude,
+          },
+        }
+      : {}),
     openingHoursSpecification: SITE.openingHours.map((slot) => ({
       '@type': 'OpeningHoursSpecification',
       dayOfWeek: slot.days,

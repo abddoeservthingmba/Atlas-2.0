@@ -91,14 +91,26 @@ Two contrast rules that are easy to break:
 All text pairings are verified against WCAG AA. Re-check after any palette
 change rather than trusting the numbers in the comments.
 
+## Content
+
+`docs/content-inventory.md` records the current site's real copy, pricing and
+structure, plus the defects the rebuild should not inherit. Build pages from
+that, not placeholder text.
+
+NAP in `src/config/site.ts` is the real business data, taken from the live
+site's own bundle.
+
 ## Outstanding placeholders
 
-Search the repo for `TODO` — the ones that matter:
+Search the repo for `TODO`. The ones that matter:
 
-- `src/config/site.ts` — NAP (address, phone, email), hours, social URLs, geo.
-- Fonts are loaded from Google Fonts; self-host as woff2 before launch.
-- `public/og-default.png` and the favicon are generated placeholders, not
-  real brand assets.
+- **Geo coordinates** — omitted from JSON-LD entirely rather than shipping
+  `0,0`. Needs the real lat/long.
+- **Which WhatsApp number** — the live site carries both an Indian and a UK
+  number; the Indian one is used here. Confirm before launch.
+- `public/og-default.png` and the favicon are generated placeholders, not real
+  brand assets.
+- Fonts load from Google Fonts; self-host as woff2 before launch.
 
 ## Reviewing on a phone
 
