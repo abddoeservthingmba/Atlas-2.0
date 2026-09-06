@@ -48,9 +48,14 @@ const canonical = absoluteUrl(Astro.url.pathname, origin);
 const socialImage = absoluteUrl(withBase(image), origin);
 const jsonLd = schema ? JSON.stringify(healthClubSchema(canonical, origin)) : null;
 
-// The GitHub Pages build sets this. A public mirror of the site must never be
+// Any origin that is not the production domain is a preview -- GitHub Pages,
+// and Vercel preview and project URLs alike. A public mirror must never be
 // indexable, or it competes with the real domain for its own content.
-const isPreview = import.meta.env.PUBLIC_SITE_PREVIEW === '1';
+//
+// Derived rather than passed in as a flag, so a new host is handled correctly
+// by default instead of silently shipping an indexable duplicate. To mark a
+// host as production, point SITE_URL at the production domain there.
+const isPreview = new URL(canonical).origin !== new URL(SITE.url).origin;
 ---
 
 <!doctype html>

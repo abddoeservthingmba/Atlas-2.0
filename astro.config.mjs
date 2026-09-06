@@ -1,22 +1,45 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 
+/** The real domain. Anything else is treated as a preview host. */
+const PRODUCTION_URL = 'https://www.atlasfitnesselite.com';
+
 /**
- * `site` and `base` are environment-driven so one codebase serves two hosts:
+ * Resolve the origin this build will be served from.
  *
- *   local / production   defaults below -> https://www.atlasfitnesselite.com/
- *   GitHub Pages preview SITE_URL + BASE_PATH set by .github/workflows/deploy.yml
+ * Precedence:
+ *   1. SITE_URL          explicit override. Set this in Vercel's project
+ *                        settings once atlasfitnesselite.com points at it,
+ *                        so production stops being treated as a preview.
+ *   2. Vercel env        VERCEL_URL is unique per deployment, so a preview
+ *                        self-references; a production deploy prefers the
+ *                        stable project domain instead.
+ *   3. PRODUCTION_URL    local builds and `astro dev`.
  *
- * A GitHub Pages project site is served from a subpath (/<repo>/), so every
- * absolute asset URL has to carry that prefix. Astro handles its own emitted
- * assets; anything hand-written in a template must go through withBase() from
- * src/config/site.ts.
+ * Pages sets SITE_URL explicitly (see .github/workflows/deploy.yml).
  */
-const site = process.env.SITE_URL ?? 'https://www.atlasfitnesselite.com';
+function resolveSite() {
+  if (process.env.SITE_URL) return process.env.SITE_URL;
+
+  if (process.env.VERCEL) {
+    const host =
+      process.env.VERCEL_ENV === 'production'
+        ? (process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL)
+        : process.env.VERCEL_URL;
+    if (host) return `https://${host}`;
+  }
+
+  return PRODUCTION_URL;
+}
+
+/**
+ * Vercel serves from the domain root, so the base stays '/'. Only a GitHub
+ * Pages project site needs a subpath, and its workflow sets BASE_PATH.
+ */
 const base = process.env.BASE_PATH ?? '/';
 
 export default defineConfig({
-  site,
+  site: resolveSite(),
   base,
   output: 'static',
   trailingSlash: 'ignore',

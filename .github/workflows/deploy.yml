@@ -5,8 +5,9 @@
 # SITE_URL for absolute canonical/OG tags, BASE_PATH for asset prefixes. Both
 # are derived from the GitHub context, so nothing is hard-coded.
 #
-# PUBLIC_SITE_PREVIEW=1 makes every page emit `noindex`, so this public mirror
-# never competes with the production domain in search results.
+# Every page emits `noindex` here: Base.astro treats any origin that is not the
+# production domain as a preview, so this public mirror never competes with the
+# real domain in search results.
 #
 # ONE-TIME SETUP: Pages must be enabled by a human before the first deploy --
 # Settings > Pages > Source: "GitHub Actions". GITHUB_TOKEN is not permitted to
@@ -70,7 +71,6 @@ jobs:
         env:
           SITE_URL: ${{ steps.url.outputs.origin }}
           BASE_PATH: ${{ steps.url.outputs.base }}
-          PUBLIC_SITE_PREVIEW: '1'
         run: pnpm build
 
       # Fail loudly here rather than shipping an empty shell to Pages.

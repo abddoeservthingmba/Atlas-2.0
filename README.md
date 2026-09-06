@@ -9,6 +9,28 @@ Mobile-first marketing site rebuild for [atlasfitnesselite.com](https://www.atla
 - **Plain CSS** with custom properties. No Tailwind, no component library.
 - **Sharp** — image optimization
 
+## Hosting
+
+Deployed on Vercel (`vercel.json` pins the framework, install and build
+commands). The GitHub Pages workflow is kept as a fallback.
+
+The build resolves its own origin, so canonical/OG tags and JSON-LD are
+correct on every host without per-host code:
+
+| host | canonical | indexable |
+| --- | --- | --- |
+| Vercel preview | that deployment's URL | no |
+| Vercel project URL | `*.vercel.app` | no |
+| GitHub Pages | `…github.io/<repo>/` | no |
+| production domain | `atlasfitnesselite.com` | **yes** |
+
+Anything that is not the production domain is treated as a preview and emits
+`noindex`, so a public mirror never competes with the real site in search.
+
+**When the domain goes live:** set `SITE_URL=https://www.atlasfitnesselite.com`
+in the Vercel project's environment variables. That is what flips the build
+from preview to production — without it, a live site would stay `noindex`.
+
 ## Commands
 
 | Command | Does |
