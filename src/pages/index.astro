@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import HeroScene from '../components/HeroScene.astro';
 import { SITE, withBase } from '../config/site';
 import { PROGRAMS, PLANS, FEATURED_PLAN_MONTHS, formatRupees } from '../data/content';
 import heroImage from '../assets/photos/gym1.jpg';
@@ -26,6 +27,9 @@ const previewPrograms = PROGRAMS.slice(0, 6);
         loading="eager"
         fetchpriority="high"
       />
+      {/* Inside the figure, so the scrim (its ::after, painted last) falls over
+          the medallion too and the headline keeps its contrast. */}
+      <HeroScene />
     </div>
 
     <div class="container hero__body">
@@ -211,7 +215,7 @@ const previewPrograms = PROGRAMS.slice(0, 6);
 
   .hero__body {
     /* Pull the copy up over the base of the image, where the scrim has already
-       resolved to the page ground. */
+       resolved to the page ground. Sits above the WebGL layer. */
     margin-top: -30%;
     position: relative;
     z-index: var(--z-raised);
@@ -287,8 +291,11 @@ const previewPrograms = PROGRAMS.slice(0, 6);
     background-color: var(--color-surface);
   }
 
+  /* Gold marks the chosen plan; the button inside it stays red. Distinction
+     and action are different jobs, and giving both to one colour is what made
+     the original site shout. */
   .plan--featured {
-    border-color: var(--color-action);
+    border-color: var(--color-border-premium);
   }
 
   .plan__flag {
@@ -296,7 +303,7 @@ const previewPrograms = PROGRAMS.slice(0, 6);
     font-weight: var(--weight-semibold);
     letter-spacing: var(--tracking-luxe);
     text-transform: uppercase;
-    color: var(--color-text-accent);
+    color: var(--color-text-premium);
     margin-bottom: var(--space-3);
   }
 

@@ -114,10 +114,35 @@ corrected (the reasoning is recorded at the top of `tokens.css`):
 | current site | here | why |
 | --- | --- | --- |
 | `#ff0033` neon red | `#c8102e` crimson | the neon red is the main "supplement store" tell |
-| `#ffd700` gold | removed | a fourth colour dilutes black/red/white |
+| `#ffd700` gold | `#d4af67` antique | pure yellow beside a strong red reads fairground; antique gold reads as struck metal |
 | `glow-red` / `glow-yellow` | removed | glows read as gaming hardware |
 | radii to 24px | 2-3px | luxury is sharp |
 | Outfit + Inter | Bodoni Moda + Archivo | a high-contrast didone is the luxury signal |
+
+**Red and gold have different jobs.** Red is *action* — buttons, links, the
+live page. Gold is *distinction* — the medallion, the chosen plan, the best
+rate. Two loud colours competing for the same job is what made the original
+look cheap.
+
+## Hero scene (WebGL)
+
+`src/scripts/hero-scene.ts` turns the Atlas mark as a struck gold medallion in
+drifting chalk dust. Technique adapted from ThreeUI's `SylvaHero` (MIT):
+transparent canvas over the page, shader-driven geometry, deterministic noise,
+capped DPR, offscreen/idle pause, reduced-motion path.
+
+It is strictly an enhancement, layered under the hero scrim:
+
+- three.js is a **lazy chunk** (~517KB) imported only when the hero nears the
+  viewport, on an idle callback. It is not referenced by the initial HTML and
+  no other page loads it.
+- No WebGL, a script error, or JS off → the hero is the photograph and
+  headline, unchanged.
+- `prefers-reduced-motion` renders one considered frame and never animates.
+- The coin oscillates ±34° rather than rotating fully: a 360° spin spends much
+  of each cycle edge-on, where it collapses into a bright bar behind the
+  headline.
+- Gold is read from `tokens.css` at runtime, so the 3D follows a rebrand.
 
 Two contrast rules that are easy to break:
 

@@ -1,0 +1,92 @@
+---
+import { withBase } from '../config/site';
+
+/**
+ * WebGL layer for the hero: the turning Atlas medallion and chalk dust.
+ *
+ * Strictly an enhancement. The canvas sits over the photograph and under the
+ * scrim and type, so if WebGL is unavailable, the script fails, or the browser
+ * has JavaScript off, the hero is exactly what it was — a photograph with a
+ * headline on it. Nothing that has to be read depends on this rendering.
+ *
+ * three.js is imported dynamically and only once the hero is near the viewport,
+ * so it never blocks first paint or competes with the hero image for bandwidth.
+ */
+const markUrl = withBase('/brand/atlas-mark-square.png');
+---
+
+<div class="hero-fx" aria-hidden="true">
+  <canvas class="hero-fx__canvas" data-hero-canvas data-mark={markUrl}></canvas>
+</div>
+
+<style>
+  .hero-fx {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-base);
+    pointer-events: none;
+    /* Screen keeps the dust and the gold additive over the photograph, so the
+       medallion reads as light in the room rather than a sticker on top. */
+    mix-blend-mode: screen;
+  }
+
+  .hero-fx__canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    /* Fades in once the first frame is rendered, so there is no flash of an
+       empty canvas or a pop as the texture lands. */
+    opacity: 0;
+    transition: opacity 1200ms var(--ease-out);
+  }
+
+  .hero-fx__canvas[data-ready] {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-fx__canvas {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-hero-canvas]');
+
+  if (canvas) {
+    const mark = canvas.dataset.mark ?? '/brand/atlas-mark-square.png';
+
+    const boot = async () => {
+      try {
+        const { createHeroScene } = await import('../scripts/hero-scene');
+        const handle = createHeroScene(canvas, mark);
+        if (handle) {
+          canvas.setAttribute('data-ready', '');
+          window.addEventListener('pagehide', () => handle.destroy(), { once: true });
+        }
+      } catch {
+        // Enhancement only — leave the photograph as it is.
+      }
+    };
+
+    // Wait until the hero is actually approaching the viewport before pulling
+    // three.js down. rootMargin starts it just before it is needed.
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          if ('requestIdleCallback' in window) {
+            (window as Window & typeof globalThis).requestIdleCallback(() => void boot(), {
+              timeout: 1500,
+            });
+          } else {
+            setTimeout(() => void boot(), 200);
+          }
+        }
+      },
+      { rootMargin: '200px' },
+    );
+    io.observe(canvas);
+  }
+</script>

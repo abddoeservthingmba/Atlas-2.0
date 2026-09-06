@@ -13,8 +13,11 @@
      #ff0033 neon red   #C8102E crimson   the neon red is the single biggest
                                           "supplement store" tell; deepening
                                           it is what buys the luxury read
-     #ffd700 gold       (removed)         a fourth colour dilutes black/red/
-                                          white; gold + red is carnival
+     #ffd700 gold       #d4af67 antique   pure yellow beside a strong red reads
+                                          fairground; an antique gold reads as
+                                          struck metal. Kept to distinction
+                                          (medallion, chosen plan) so it never
+                                          competes with red for action
      glow-red/-yellow   (removed)         glows read as gaming hardware
      radius up to 24px  2-3px             luxury is sharp; soft corners are
                                           friendly, not expensive
@@ -80,6 +83,24 @@
   --red-800: #5e0715; /* oxblood — deep fills, gradients */
   --red-900: #3a040d; /* near-black red — hairlines on the void */
 
+  /* ---- Gold -----------------------------------------------------------
+     The fourth brand colour, and the one most easily ruined. The current site
+     uses #ffd700 — a pure yellow that next to a strong red reads as fairground
+     rather than luxury. These are antique golds: desaturated, warm, closer to
+     struck metal than to paint.
+
+     Gold and red are given different jobs so they never fight. Red is action
+     (buttons, links, the live page). Gold is distinction (the medallion, the
+     chosen plan, credentials). Two loud colours competing for the same job is
+     what made the original look cheap.
+     -------------------------------------------------------------------- */
+  --gold-200: #f0dcae; /* light — large text and marks on dark */
+  --gold-300: #e8c98a; /* TEXT gold on dark */
+  --gold-400: #d4af67; /* lit metal, highlights */
+  --gold-500: #b8912f; /* mid metal */
+  --gold-600: #8a6a1f; /* deep metal, the medallion body */
+  --gold-700: #5f4713; /* shadowed metal, hairlines on black */
+
   /* ---- Status ---------------------------------------------------------
      Functional only (form validation, class availability). Kept distinct
      from the brand red so "error" never reads as "brand".
@@ -108,12 +129,14 @@
   --color-text-inverse:   var(--ink-900);  /* on --color-surface-inverse */
   --color-text-accent:    var(--red-400);  /*  5.3:1 — the only red safe as text */
   --color-text-on-accent: var(--ink-0);    /*  5.9:1 on --red-500 */
+  --color-text-premium:   var(--gold-300); /* gold safe as text on the surface */
 
   /* Lines */
   --color-border:        var(--ink-600);
   --color-border-strong: var(--ink-500);
   --color-divider:       var(--ink-700);
   --color-border-accent: var(--red-800);
+  --color-border-premium: var(--gold-600);
 
   /* Interactive */
   --color-action:        var(--red-500);
@@ -122,6 +145,10 @@
   --color-action-subtle: var(--red-900);
   --color-link:          var(--red-400);
   --color-focus-ring:    var(--red-400);
+
+  /* Distinction — never an action. See the note on the gold ramp. */
+  --color-premium:        var(--gold-400);
+  --color-premium-deep:   var(--gold-600);
 
   /* Feedback */
   --color-success: var(--success-400);

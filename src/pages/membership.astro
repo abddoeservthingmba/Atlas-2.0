@@ -181,8 +181,11 @@ const bestRate = Math.min(...PLANS.map((p) => perMonth(p.price, p.months)));
     border-radius: var(--radius-card);
   }
 
+  /* Gold marks the chosen plan; the button inside it stays red. Distinction
+     and action are different jobs, and giving both to one colour is what made
+     the original site shout. */
   .plan--featured {
-    border-color: var(--color-action);
+    border-color: var(--color-border-premium);
   }
 
   .plan__flag:empty::before {
@@ -195,7 +198,7 @@ const bestRate = Math.min(...PLANS.map((p) => perMonth(p.price, p.months)));
     font-weight: var(--weight-semibold);
     letter-spacing: var(--tracking-luxe);
     text-transform: uppercase;
-    color: var(--color-text-accent);
+    color: var(--color-text-premium);
     margin-bottom: var(--space-3);
   }
 
@@ -235,7 +238,7 @@ const bestRate = Math.min(...PLANS.map((p) => perMonth(p.price, p.months)));
   }
 
   .plan__best {
-    color: var(--color-text-accent);
+    color: var(--color-text-premium);
   }
 
   .plan__adds {
