@@ -43,12 +43,29 @@ from preview to production — without it, a live site would stay `noindex`.
 | `pnpm preview` | Serve `dist/` on `0.0.0.0:4321` |
 | `pnpm check` | `astro check` — TS + template diagnostics |
 
-## Layout rule
+## Layout
 
-The design **is** a 480px column (`--layout-max`). On viewports wider than
-that, the column is centred on a darker surround (`--color-surround`) with a
-drop shadow, so desktop reads as an intentional frame rather than a phone
-layout stretched across a monitor.
+Responsive, mobile-first. Three breakpoints, used in this order everywhere —
+a breakpoint per component is how a layout system rots:
+
+| | width | layout |
+| --- | --- | --- |
+| base | — | single column, hamburger, sticky bottom CTA |
+| md | `48em` / 768px | two-up grids, wider gutters |
+| lg | `64em` / 1024px | three-up grids, inline nav + header CTA, no sticky bar |
+| wide | `90em` / 1440px | gutters grow, content stops at `--layout-max` (1200px) |
+
+Only **tokens** are redefined per breakpoint, never component rules. A
+component reads `--text-3xl` and gets the right size for the viewport without
+knowing a breakpoint exists.
+
+Grids use one `.grid` utility driven by `--cols` / `--cols-md` / `--cols-lg`,
+so a component declares intent once rather than carrying a stack of
+`.col-md-3`-style classes.
+
+The sticky bottom CTA is retired at `lg`: a bar pinned to the bottom of a
+1440px window is a phone pattern, and the header carries the same action
+where a desktop user looks for it.
 
 ## Where things live
 

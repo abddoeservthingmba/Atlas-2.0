@@ -4,12 +4,16 @@ import logoMark from '../assets/photos/logo-mark.png';
 import { SITE, withBase } from '../config/site';
 
 /**
- * Sticky masthead.
+ * Sticky masthead. One markup tree serves both layouts.
  *
- * The current site puts six nav links inline next to the wordmark at mobile
- * width, so the links sit on top of the logo on every page. Here the bar holds
- * only the wordmark and one control; the links live in a panel that covers the
- * column when opened. Nothing can overlap because nothing shares the row.
+ * The current site puts six nav links inline beside the wordmark at mobile
+ * width, so the links overlap the logo on every page. Here the row holds the
+ * wordmark and one control on a phone, and the links wrap to a panel below it.
+ * At desktop the same <nav> becomes an inline row between the wordmark and the
+ * CTA.
+ *
+ * One nav, not two: aria-current, link order and the no-JS fallback stay in
+ * sync because there is only ever one list to keep correct.
  */
 
 interface Props {
@@ -42,8 +46,8 @@ const current = (href: string): boolean => {
         class="wordmark__mark"
         src={logoMark}
         alt=""
-        width={72}
-        height={60}
+        width={88}
+        height={73}
         densities={[1, 2]}
         loading="eager"
       />
@@ -62,30 +66,32 @@ const current = (href: string): boolean => {
       <span class="visually-hidden">Menu</span>
       <span class="menu-toggle__bars" aria-hidden="true"><i></i><i></i></span>
     </button>
+
+    <nav class="menu" id="site-menu" aria-label="Main" data-menu hidden>
+      <ul class="menu__list" role="list">
+        {
+          links.map((link) => (
+            <li>
+              <a
+                class="menu__link"
+                href={withBase(link.href)}
+                aria-current={current(link.href) ? 'page' : undefined}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="menu__foot">
+        <a class="menu__call" href={SITE.cta.secondaryHref}>{SITE.telephone}</a>
+        <p class="menu__hours">Mon–Sat 5am–11pm · Sun 5am–6pm</p>
+      </div>
+    </nav>
+
+    <a class="masthead__cta btn btn--primary" href={SITE.cta.href}>{SITE.cta.label}</a>
   </div>
-
-  <nav class="menu" id="site-menu" aria-label="Main" data-menu hidden>
-    <ul class="menu__list" role="list">
-      {
-        links.map((link) => (
-          <li>
-            <a
-              class="menu__link"
-              href={withBase(link.href)}
-              aria-current={current(link.href) ? 'page' : undefined}
-            >
-              {link.label}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-
-    <div class="menu__foot">
-      <a class="menu__call" href={SITE.cta.secondaryHref}>{SITE.telephone}</a>
-      <p class="menu__hours">Mon–Sat 5am–11pm · Sun 5am–6pm</p>
-    </div>
-  </nav>
 </header>
 
 <style>
@@ -97,14 +103,20 @@ const current = (href: string): boolean => {
     border-bottom: var(--border-quiet);
   }
 
+  /* Capped and centred like every other row, so the wordmark lines up with the
+     content beneath it instead of hugging the window edge on a wide screen. */
   .masthead__bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
     gap: var(--space-4);
+
+    max-width: calc(var(--layout-max) + var(--layout-gutter) * 2);
+    margin-inline: auto;
     min-height: var(--header-height);
     padding-inline: var(--layout-gutter);
-    /* Extend under the notch in landscape without shifting the content. */
+    /* Clear the notch in landscape without shifting the content. */
     padding-left: max(var(--layout-gutter), env(safe-area-inset-left));
     padding-right: max(var(--layout-gutter), env(safe-area-inset-right));
   }
@@ -132,7 +144,6 @@ const current = (href: string): boolean => {
     line-height: 1;
   }
 
-  /* The second word steps back so the mark and "Atlas" carry the identity. */
   .wordmark__thin {
     color: var(--color-text-accent);
   }
@@ -163,7 +174,7 @@ const current = (href: string): boolean => {
     margin-top: 6px;
   }
 
-  /* Open state: the two bars cross. */
+  /* Open: the two bars cross. */
   .menu-toggle[aria-expanded='true'] .menu-toggle__bars i:first-child {
     transform: translateY(3.75px) rotate(45deg);
   }
@@ -172,11 +183,15 @@ const current = (href: string): boolean => {
     transform: translateY(-3.75px) rotate(-45deg);
   }
 
-  /* ---- Panel ---- */
+  /* ---- Mobile panel ----
+     Takes a full row of the wrapping flex bar. The negative margin lets its
+     top border span the full width while the links stay on the gutter. */
   .menu {
+    flex: 1 0 100%;
+    margin-inline: calc(var(--layout-gutter) * -1);
+    padding: var(--space-6) var(--layout-gutter) var(--space-8);
     border-top: var(--border-quiet);
     background-color: var(--color-surround);
-    padding: var(--space-6) var(--layout-gutter) var(--space-8);
   }
 
   .menu__list {
@@ -217,12 +232,92 @@ const current = (href: string): boolean => {
     font-size: var(--text-xs);
     color: var(--color-text-subtle);
   }
+
+  /* Hidden on mobile: the panel carries the phone number, and the sticky
+     bottom bar already puts the action under the thumb. */
+  .masthead__cta {
+    display: none;
+  }
+
+  /* ------------------------------------------------------------------
+     DESKTOP
+
+     The same panel becomes an inline row. `[hidden]` is overridden here
+     deliberately: it reflects the mobile toggle's state, which has no meaning
+     at this width, and the nav must always show.
+     ------------------------------------------------------------------ */
+  @media (min-width: 64em) {
+    .masthead__bar {
+      flex-wrap: nowrap;
+      min-height: var(--header-height-lg);
+      gap: var(--space-8);
+    }
+
+    .wordmark__mark {
+      width: 44px;
+    }
+
+    .wordmark__text {
+      font-size: var(--text-lg);
+    }
+
+    .menu-toggle {
+      display: none;
+    }
+
+    .menu,
+    .menu[hidden] {
+      display: block;
+      flex: 1 1 auto;
+      margin-inline: 0;
+      padding: 0;
+      border-top: 0;
+      background: none;
+    }
+
+    .menu__list {
+      flex-direction: row;
+      justify-content: flex-end;
+      gap: var(--space-6);
+    }
+
+    .menu__link {
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      letter-spacing: var(--tracking-wide);
+      padding-block: var(--space-2);
+      border-bottom: 0;
+      white-space: nowrap;
+    }
+
+    .menu__link:hover {
+      color: var(--color-text-accent);
+    }
+
+    /* The current page is marked with a rule as well as colour, so it is not
+       carried by hue alone. */
+    .menu__link[aria-current='page'] {
+      box-shadow: 0 1px 0 var(--color-action);
+    }
+
+    .menu__foot {
+      display: none;
+    }
+
+    .masthead__cta {
+      display: inline-flex;
+      flex: none;
+      min-height: var(--tap-comfy);
+      min-width: 0;
+      padding-inline: var(--space-6);
+    }
+  }
 </style>
 
 <script>
-  // Progressive enhancement: the panel ships open-able only once this runs.
-  // Without JS the markup is still a plain nav list, just hidden -- so the
-  // footer carries the same links as a no-JS fallback.
+  // Progressive enhancement. Without this the panel stays closed on mobile and
+  // the footer carries the same links; at desktop CSS shows the nav regardless.
   const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
   const menu = document.querySelector<HTMLElement>('[data-menu]');
 
@@ -244,8 +339,8 @@ const current = (href: string): boolean => {
       }
     });
 
-    // Close after following a link to an in-page anchor, where no navigation
-    // happens and the panel would otherwise stay covering the content.
+    // Close after an in-page anchor, where no navigation happens and the panel
+    // would otherwise stay covering the content.
     menu.addEventListener('click', (event) => {
       if (event.target instanceof HTMLAnchorElement) setOpen(false);
     });

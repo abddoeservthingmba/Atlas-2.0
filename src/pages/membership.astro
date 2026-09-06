@@ -32,25 +32,30 @@ const bestRate = Math.min(...PLANS.map((p) => perMonth(p.price, p.months)));
 
   <section class="section">
     <div class="container">
-      <ul class="plans" role="list">
+      <ul class="plans grid" role="list">
         {
           featured.map((plan) => (
             <li class={`plan${plan.featured ? ' plan--featured' : ''}`}>
-              {plan.featured && <p class="plan__flag">Most chosen</p>}
+              {/* Always rendered, empty when not featured: with subgrid the
+                  flag row takes the same height on every card, so the prices
+                  below it share a baseline instead of stepping down. */}
+              <p class="plan__flag" aria-hidden={plan.featured ? undefined : 'true'}>
+                {plan.featured ? 'Most chosen' : ''}
+              </p>
               <h2 class="plan__term">{plan.label}</h2>
               <p class="plan__price">
                 {formatRupees(plan.price)}
                 <span class="plan__gst">+ GST</span>
               </p>
-              {/* Redundant on a one-month term, where it restates the total. */}
-              {plan.months > 1 && (
-                <p class="plan__per">
-                  {formatRupees(perMonth(plan.price, plan.months))} a month
-                  {perMonth(plan.price, plan.months) === bestRate && (
-                    <span class="plan__best"> · best rate</span>
-                  )}
-                </p>
-              )}
+              {/* Shown on every card, including the one-month term where it
+                  restates the total: side by side this is the axis people
+                  actually compare on, so a gap here breaks the comparison. */}
+              <p class="plan__per">
+                {formatRupees(perMonth(plan.price, plan.months))} a month
+                {perMonth(plan.price, plan.months) === bestRate && (
+                  <span class="plan__best"> · best rate</span>
+                )}
+              </p>
 
               <ul class="plan__adds" role="list">
                 {plan.adds.map((add) => (
@@ -106,7 +111,7 @@ const bestRate = Math.min(...PLANS.map((p) => perMonth(p.price, p.months)));
         <h2 class="section-head__title">Beyond the membership</h2>
       </div>
 
-      <ul class="entries entries--compact" role="list">
+      <ul class="entries entries--compact grid addons__grid" role="list">
         {
           ADD_ONS.map((item) => (
             <li class="entry">
@@ -125,11 +130,49 @@ const bestRate = Math.min(...PLANS.map((p) => perMonth(p.price, p.months)));
 </Base>
 
 <style>
+  /* Three plans, three columns at desktop — the comparison people came to
+     make happens in one glance instead of a scroll. */
   .plans {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    margin-bottom: var(--space-8);
+    --cols-lg: 3;
+    --grid-gap: var(--space-4);
+    align-items: start;
+    margin-bottom: var(--space-10);
+  }
+
+  /* Side by side, the three cards must read as one object: same edges, and
+     the price, the rule and the button on a shared baseline across all three.
+     Subgrid does that from the real content rather than from guessed fixed
+     heights. Where it is unsupported the cards simply size to their own
+     content, which is the current mobile behaviour. */
+  @media (min-width: 64em) {
+    .plans {
+      grid-template-rows: repeat(6, auto);
+      align-items: stretch;
+    }
+
+    .plan {
+      grid-row: span 6;
+      display: grid;
+      grid-template-rows: subgrid;
+      gap: 0;
+    }
+
+    /* The button sits on the last row, pushed to the bottom of its cell so
+       all three align however long the feature lists are. */
+    .plan__cta {
+      align-self: end;
+    }
+  }
+
+  .addons__grid {
+    --cols-md: 2;
+    --cols-lg: 4;
+    --grid-gap: 0 var(--space-8);
+  }
+
+  /* The full ladder is a reading table; it should not span a whole monitor. */
+  .ladder {
+    max-width: var(--layout-narrow);
   }
 
   .plan {
@@ -140,6 +183,11 @@ const bestRate = Math.min(...PLANS.map((p) => perMonth(p.price, p.months)));
 
   .plan--featured {
     border-color: var(--color-action);
+  }
+
+  .plan__flag:empty::before {
+    content: '';
+    display: inline-block;
   }
 
   .plan__flag {

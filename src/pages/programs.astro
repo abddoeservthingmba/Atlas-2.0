@@ -17,7 +17,7 @@ import { PROGRAMS } from '../data/content';
 
   <section class="section">
     <div class="container">
-      <ul class="entries" role="list">
+      <ul class="entries grid programs__grid" role="list">
         {
           PROGRAMS.map((program) => (
             <li class="entry" id={program.slug}>
@@ -37,6 +37,14 @@ import { PROGRAMS } from '../data/content';
 </Base>
 
 <style>
+  /* Two-up at tablet, three-up at desktop. Nine items divide evenly by three,
+     so no row is left with a single orphan. */
+  .programs__grid {
+    --cols-md: 2;
+    --cols-lg: 3;
+    --grid-gap: 0 var(--space-10);
+  }
+
   /* Programme names are the page's structural rhythm, so they take the
      grotesque at heading size rather than the display face — nine didone
      headings in a row would be shouting. */

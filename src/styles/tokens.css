@@ -36,9 +36,9 @@
 
    Contrast: every text pairing below is verified against WCAG AA (4.5:1).
    Two rules that are easy to break — read before changing a red:
-     - --red-500 is a FILL ONLY. As text on the column it is 3.22:1. White
+     - --red-500 is a FILL ONLY. As text on the surface it is 3.18:1. White
        text on it is 5.88:1, which is why it works as a button.
-     - --red-400 is the TEXT red, 5.30:1 on the column.
+     - --red-400 is the TEXT red, 5.25:1 on the surface.
    ========================================================================== */
 
 :root {
@@ -52,7 +52,7 @@
      cheap; the warm bias makes the neutrals and the red feel like one
      family. This is the whole "black and white" half of the palette.
      -------------------------------------------------------------------- */
-  --ink-1000: #000000; /* true void — the desktop surround only */
+  --ink-1000: #000000; /* true void — page ground and header/footer */
   --ink-950:  #0a0809;
   --ink-900:  #151113; /* the content column — a lifted black, not the void */
   --ink-850:  #1c1719;
@@ -94,8 +94,8 @@
      ====================================================================== */
 
   /* Surfaces */
-  --color-surround:        var(--ink-1000); /* the void around the column */
-  --color-surface:         var(--ink-900);  /* the content column itself */
+  --color-surround:        var(--ink-1000); /* page ground, header, footer */
+  --color-surface:         var(--ink-900);  /* the content surface */
   --color-surface-subtle:  var(--ink-850);  /* alternating section bands */
   --color-surface-sunken:  var(--ink-950);  /* wells, inset panels */
   --color-surface-raised:  var(--ink-800);  /* cards lifted off the column */
@@ -140,9 +140,10 @@
          the work: body, labels, buttons, nav. More character at small
          sizes than the usual neutral defaults.
 
-     The content column is capped at 480px, so sizes are fixed rather than
-     fluid — a fixed scale is more predictable and there is no wide viewport
-     to fill.
+     The scale steps up at each breakpoint (see the bottom of this file)
+     rather than scaling fluidly with the viewport. Discrete steps are
+     predictable and testable; fluid type is neither, and it tends to produce
+     one size that is wrong on every screen instead of right on three.
      ====================================================================== */
 
   --font-display: 'Bodoni Moda', 'Didot', 'Bodoni MT', Georgia, 'Times New Roman', serif;
@@ -255,13 +256,27 @@
 
   /* ======================================================================
      6. LAYOUT
-        Mobile-first. The design IS the 480px column; wider viewports get a
-        true-black surround so desktop reads as an intentional frame rather
-        than a stretched phone layout.
+
+     Mobile-first and responsive. The site was originally a fixed 480px
+     column; it now scales to a full desktop layout while the phone layout
+     stays the one that was designed first.
+
+     Breakpoints, used in this order everywhere. There are only three, on
+     purpose -- a breakpoint per component is how a layout system rots.
+
+       (base)            phone. Single column.
+       >= 48em  (768px)  tablet. Two-up grids, wider gutter.
+       >= 64em (1024px)  desktop. Three-up grids, inline nav, no sticky CTA.
+       >= 90em (1440px)  wide. Gutters grow; content stops at --layout-max.
      ====================================================================== */
-  --layout-max:      480px;
-  --layout-gutter:   var(--space-gutter);
-  --layout-content:  calc(var(--layout-max) - (var(--layout-gutter) * 2));
+
+  /* The content column cap. Text never runs the full width of a monitor. */
+  --layout-max:     1200px;
+  /* For prose and anything that must stay readable: ~70 characters. */
+  --layout-narrow:  720px;
+  /* The phone-width column, still used for the sticky CTA bar. */
+  --layout-phone:   480px;
+  --layout-gutter:  var(--space-gutter);
 
   /* Touch targets — 44px is the accessible floor; 48 is the comfortable one. */
   --tap-min:   44px;
@@ -278,6 +293,7 @@
   --cta-clearance:   calc(var(--cta-total) + var(--space-6));
 
   --header-height: 60px;
+  --header-height-lg: 84px;
 
   /* ======================================================================
      7. MOTION
@@ -317,4 +333,55 @@
   --focus-ring: 2px solid var(--color-focus-ring);
   --focus-ring-offset: 2px;
   --backdrop: rgb(0 0 0 / 0.75);
+}
+
+/* ==========================================================================
+   RESPONSIVE SCALE
+
+   Only tokens are redefined here -- never component rules. A component reads
+   --text-3xl and gets the right size for the viewport without knowing a
+   breakpoint exists, which is what keeps the breakpoint count at three.
+   ========================================================================== */
+
+@media (min-width: 48em) {
+  :root {
+    --space-gutter: var(--space-8);
+    --space-section: var(--space-20);
+    --space-section-tight: var(--space-12);
+    --space-section-loose: var(--space-32);
+
+    /* Type grows with the canvas. The ratio widens from 1.2 to about 1.25,
+       so headings pull further ahead of body copy on a larger screen. */
+    --text-lg: 1.4rem;
+    --text-xl: 1.75rem;
+    --text-2xl: 2.25rem;
+    --text-3xl: 3rem;
+    --text-4xl: 3.75rem;
+    --text-5xl: 4.5rem;
+  }
+}
+
+@media (min-width: 64em) {
+  :root {
+    --space-gutter: var(--space-10);
+    --space-section: var(--space-24);
+    --space-section-tight: var(--space-16);
+
+    --text-md: 1.1875rem;
+    --text-2xl: 2.5rem;
+    --text-3xl: 3.5rem;
+    --text-4xl: 4.5rem;
+    --text-5xl: 5.5rem;
+
+    /* Long-form copy gets a touch more air on a desktop reading distance. */
+    --leading-normal: 1.65;
+  }
+}
+
+@media (min-width: 90em) {
+  :root {
+    --space-gutter: var(--space-16);
+    --text-4xl: 5rem;
+    --text-5xl: 6.5rem;
+  }
 }

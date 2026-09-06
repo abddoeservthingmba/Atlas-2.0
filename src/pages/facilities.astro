@@ -24,8 +24,8 @@ import cafeImage from '../assets/photos/cafe-machines.jpg';
         <Image
           src={floorImage}
           alt="Free weights and cardio equipment on the training floor"
-          widths={[480, 960]}
-          sizes="480px"
+          widths={[480, 960, 1200]}
+          sizes="(min-width: 64em) 1200px, 100vw"
           loading="eager"
         />
       </div>
@@ -39,7 +39,7 @@ import cafeImage from '../assets/photos/cafe-machines.jpg';
         <h2 class="section-head__title">What you can train on</h2>
       </div>
 
-      <ul class="entries entries--compact" role="list">
+      <ul class="entries entries--compact grid facility__grid" role="list">
         {
           EQUIPMENT.map((item) => (
             <li class="entry">
@@ -59,7 +59,7 @@ import cafeImage from '../assets/photos/cafe-machines.jpg';
         <h2 class="section-head__title">Everything around the training</h2>
       </div>
 
-      <ul class="entries entries--compact" role="list">
+      <ul class="entries entries--compact grid facility__grid" role="list">
         {
           AMENITIES.map((item) => (
             <li class="entry">
@@ -74,8 +74,8 @@ import cafeImage from '../assets/photos/cafe-machines.jpg';
         <Image
           src={cafeImage}
           alt="The cafe and refreshment area"
-          widths={[480, 960]}
-          sizes="480px"
+          widths={[480, 960, 1200]}
+          sizes="(min-width: 64em) 1200px, 100vw"
           loading="lazy"
         />
       </div>
@@ -89,6 +89,14 @@ import cafeImage from '../assets/photos/cafe-machines.jpg';
 </Base>
 
 <style>
+  /* Ten equipment items and eight amenities: two-up then three-up, both of
+     which leave a clean final row. */
+  .facility__grid {
+    --cols-md: 2;
+    --cols-lg: 3;
+    --grid-gap: 0 var(--space-10);
+  }
+
   .facilities__figure {
     aspect-ratio: 3 / 2;
     margin-top: var(--space-10);

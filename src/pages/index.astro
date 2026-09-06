@@ -21,8 +21,8 @@ const previewPrograms = PROGRAMS.slice(0, 6);
       <Image
         src={heroImage}
         alt="The training floor at Atlas Fitness Elite"
-        widths={[480, 960]}
-        sizes="480px"
+        widths={[640, 1024, 1600, 2048]}
+        sizes="100vw"
         loading="eager"
         fetchpriority="high"
       />
@@ -55,7 +55,7 @@ const previewPrograms = PROGRAMS.slice(0, 6);
         </p>
       </div>
 
-      <dl class="proof">
+      <dl class="proof grid">
         <div class="proof__item">
           <dt>Open</dt>
           <dd>5am–11pm, Monday to Saturday</dd>
@@ -83,7 +83,7 @@ const previewPrograms = PROGRAMS.slice(0, 6);
         <h2 class="section-head__title">Nine ways to train</h2>
       </div>
 
-      <ul class="entries" role="list">
+      <ul class="entries grid home__programs" role="list">
         {
           previewPrograms.map((program) => (
             <li class="entry">
@@ -118,8 +118,8 @@ const previewPrograms = PROGRAMS.slice(0, 6);
         <Image
           src={floorImage}
           alt="Free weights and cardio equipment on the Atlas Fitness Elite floor"
-          widths={[480, 960]}
-          sizes="480px"
+          widths={[480, 960, 1200]}
+          sizes="(min-width: 64em) 1200px, 100vw"
           loading="lazy"
         />
       </div>
@@ -143,22 +143,22 @@ const previewPrograms = PROGRAMS.slice(0, 6);
         </p>
       </div>
 
-      <ul class="plans" role="list">
+      <ul class="plans grid" role="list">
         {
           featuredPlans.map((plan) => (
             <li class={`plan${plan.featured ? ' plan--featured' : ''}`}>
-              {plan.featured && <p class="plan__flag">Most chosen</p>}
+              {/* Always rendered, empty when not featured — see membership.astro. */}
+              <p class="plan__flag" aria-hidden={plan.featured ? undefined : 'true'}>
+                {plan.featured ? 'Most chosen' : ''}
+              </p>
               <h3 class="plan__term">{plan.label}</h3>
               <p class="plan__price">
                 {formatRupees(plan.price)}
                 <span class="plan__gst">+ GST</span>
               </p>
-              {/* Redundant on a one-month term, where it restates the total. */}
-              {plan.months > 1 && (
-                <p class="plan__per">
-                  {formatRupees(Math.round(plan.price / plan.months))} a month
-                </p>
-              )}
+              <p class="plan__per">
+                {formatRupees(Math.round(plan.price / plan.months))} a month
+              </p>
             </li>
           ))
         }
@@ -342,5 +342,121 @@ const previewPrograms = PROGRAMS.slice(0, 6);
     color: var(--color-text-muted);
     padding-top: var(--space-5);
     border-top: var(--border-quiet);
+  }
+
+  /* ------------------------------------------------------------------
+     TABLET AND DESKTOP
+
+     The phone hero pulls its copy up over the base of the image with a
+     negative margin. That is a single-column technique and does not survive a
+     wide viewport, so at desktop the image becomes a full-bleed backdrop and
+     the copy is laid over it — which is also the more confident composition.
+     ------------------------------------------------------------------ */
+
+  .proof {
+    --cols-md: 2;
+    --cols-lg: 4;
+    --grid-gap: 0 var(--space-8);
+  }
+
+  .home__programs {
+    --cols-md: 2;
+    --cols-lg: 3;
+    --grid-gap: 0 var(--space-10);
+  }
+
+  .plans {
+    --cols-lg: 3;
+    --grid-gap: var(--space-4);
+    align-items: start;
+  }
+
+  /* Four rows here (flag, term, price, per) — no feature list or button on
+     the home page teaser. Same reasoning as the membership page. */
+  @media (min-width: 64em) {
+    .plans {
+      grid-template-rows: repeat(4, auto);
+      align-items: stretch;
+    }
+
+    .plan {
+      grid-row: span 4;
+      display: grid;
+      grid-template-rows: subgrid;
+      gap: 0;
+    }
+  }
+
+  .plan__flag:empty::before {
+    content: '';
+    display: inline-block;
+  }
+
+  @media (min-width: 48em) {
+    .hero__body {
+      margin-top: -22%;
+    }
+
+    .hero__lead {
+      max-width: 46ch;
+    }
+
+    .home__figure {
+      aspect-ratio: 21 / 9;
+    }
+
+    .proof__item {
+      /* In a grid each cell owns its own rule, so the label and value stack
+         instead of stretching apart across a wide column. */
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-2);
+    }
+
+    .proof__item dd {
+      text-align: left;
+    }
+  }
+
+  @media (min-width: 64em) {
+    .hero {
+      display: flex;
+      align-items: flex-end;
+      min-height: min(80vh, 46rem);
+    }
+
+    .hero__media {
+      position: absolute;
+      inset: 0;
+      aspect-ratio: auto;
+    }
+
+    .hero__media :global(img) {
+      height: 100%;
+    }
+
+    /* Weighted to the bottom-left, where the copy sits, so the right of the
+       photograph stays visible instead of being flattened by a full scrim. */
+    .hero__media.figure--scrim::after {
+      background:
+        linear-gradient(to top, var(--color-surface) 0%, rgb(0 0 0 / 0.15) 55%, rgb(0 0 0 / 0.35) 100%),
+        linear-gradient(to right, rgb(0 0 0 / 0.75) 0%, rgb(0 0 0 / 0.1) 60%);
+    }
+
+    .hero__body {
+      margin-top: 0;
+      width: 100%;
+      padding-block: var(--space-24) var(--space-20);
+    }
+
+    .hero__title {
+      /* Three words a line keeps the didone stacking as a block rather than
+         running out into a thin ribbon of text. */
+      max-width: 14ch;
+    }
+
+    .hero__lead {
+      max-width: 42ch;
+    }
   }
 </style>

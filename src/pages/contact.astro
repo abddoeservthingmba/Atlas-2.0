@@ -74,14 +74,16 @@ const mapsHref = `https://maps.google.com/maps?q=${mapsQuery}`;
         <h2 class="section-head__title">Before you come in</h2>
       </div>
 
-      {
-        FAQS.map((faq) => (
-          <details class="disclosure">
-            <summary class="disclosure__summary">{faq.q}</summary>
-            <div class="disclosure__body">{faq.a}</div>
-          </details>
-        ))
-      }
+      <div class="faq">
+        {
+          FAQS.map((faq) => (
+            <details class="disclosure">
+              <summary class="disclosure__summary">{faq.q}</summary>
+              <div class="disclosure__body">{faq.a}</div>
+            </details>
+          ))
+        }
+      </div>
     </div>
   </section>
 </Base>
@@ -130,5 +132,25 @@ const mapsHref = `https://maps.google.com/maps?q=${mapsQuery}`;
 
   .details__row a:hover {
     color: var(--color-text-accent);
+  }
+
+  @media (min-width: 48em) {
+    /* Contact details sit two-up; the FAQ stays a single readable column
+       because a two-column accordion is miserable to scan. */
+    .details {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--space-10);
+    }
+
+    .contact__actions {
+      margin-bottom: var(--space-12);
+    }
+  }
+
+  @media (min-width: 64em) {
+    .faq {
+      max-width: var(--layout-narrow);
+    }
   }
 </style>

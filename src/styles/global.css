@@ -220,50 +220,67 @@ kbd {
 }
 
 /* --------------------------------------------------------------------------
-   4. APP SHELL — the layout rule.
+   4. APP SHELL
 
-   The design is a 480px column. On anything wider, the column is centred on
-   a true-black surround so desktop reads as a deliberate frame, not a phone
-   layout stretched to fill a monitor.
+   The shell fills the viewport at every width. Content is held to
+   --layout-max by .container, so text never runs the full span of a monitor,
+   and to --layout-narrow wherever it has to stay readable as prose.
    -------------------------------------------------------------------------- */
 
 .shell {
   width: 100%;
-  max-width: var(--layout-max);
-  margin-inline: auto;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background-color: var(--color-surface);
   position: relative;
-  isolation: isolate; /* keeps the CTA bar's stacking context local to the column */
+  isolation: isolate; /* keeps the CTA bar's stacking context local */
 }
 
 .shell__main {
   flex: 1 1 auto;
-  /* Reserve room for the fixed CTA bar so it never covers the last element. */
+  /* Reserve room for the fixed CTA bar so it never covers the last element.
+     Removed at desktop below, where the bar itself is removed. */
   padding-bottom: var(--cta-clearance);
 }
 
-/* Above the column width, lift the column off the void. Two near-blacks
-   sitting side by side separate on screen far better than their contrast
-   ratio (1.12:1) suggests, but the shadow and hairline are what actually
-   sell it as a deliberate frame. */
-@media (min-width: 481px) {
-  .shell {
-    box-shadow: var(--shadow-column);
-  }
-}
-
-/* Standard horizontal gutter. Every section should use this. */
+/* Standard horizontal gutter plus the content cap. Every section uses this.
+   The gutter itself grows with the breakpoint via --space-gutter. */
 .container {
   width: 100%;
+  max-width: calc(var(--layout-max) + var(--layout-gutter) * 2);
   padding-inline: var(--layout-gutter);
   margin-inline: auto;
 }
 
+/* Anything that is read as prose rather than scanned. */
+.container--narrow {
+  max-width: calc(var(--layout-narrow) + var(--layout-gutter) * 2);
+}
+
 .section {
   padding-block: var(--space-section);
+}
+
+/* --------------------------------------------------------------------------
+   4b. GRID
+
+   One grid utility, driven by a --cols custom property per breakpoint, rather
+   than a set of `.col-2 .col-md-3` classes. Components declare intent once.
+   -------------------------------------------------------------------------- */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr));
+  gap: var(--grid-gap, var(--space-6));
+}
+
+@media (min-width: 48em) {
+  .grid { --cols: var(--cols-md, var(--cols, 1)); }
+}
+
+@media (min-width: 64em) {
+  .grid { --cols: var(--cols-lg, var(--cols-md, var(--cols, 1))); }
 }
 
 /* Screen-reader-only, still focusable. */
@@ -294,7 +311,7 @@ kbd {
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  max-width: var(--layout-max);
+  max-width: var(--layout-phone);
   z-index: var(--z-cta);
 
   display: flex;
@@ -384,6 +401,19 @@ kbd {
    rather than removed outright, so animation/transition end events still
    fire and any JS that depends on them does not stall.
    -------------------------------------------------------------------------- */
+
+/* At desktop the sticky bar is retired: a bar pinned to the bottom of a
+   1440px window is a phone pattern, and the header carries the same action
+   where a desktop user looks for it. The clearance it reserved goes too. */
+@media (min-width: 64em) {
+  .cta-bar {
+    display: none;
+  }
+
+  .shell__main {
+    padding-bottom: 0;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -649,4 +679,53 @@ kbd {
   flex-direction: column;
   gap: var(--space-3);
   margin-top: var(--space-8);
+}
+
+/* --------------------------------------------------------------------------
+   8. RESPONSIVE COMPONENT BEHAVIOUR
+
+   Layout changes only. Every size in here comes from a token that has already
+   stepped up at this breakpoint, so nothing is re-specified.
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 48em) {
+  /* Buttons stop being full-width once there is room to sit side by side. */
+  .actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .btn--block {
+    width: auto;
+    min-width: 14rem;
+  }
+
+  .section-head {
+    max-width: var(--layout-narrow);
+    margin-bottom: var(--space-10);
+  }
+
+  .entry {
+    padding-block: var(--space-8);
+  }
+}
+
+@media (min-width: 64em) {
+  /* Hover only where there is a pointer that can hover. Touch devices get
+     the :active state instead, which is already defined. */
+  .entry {
+    padding-block: var(--space-8);
+  }
+
+  .disclosure__summary {
+    font-size: var(--text-md);
+    padding-block: var(--space-6);
+  }
+}
+
+/* A row of buttons should not stretch to the container on wide screens. */
+@media (min-width: 64em) {
+  .actions {
+    gap: var(--space-4);
+  }
 }

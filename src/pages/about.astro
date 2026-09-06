@@ -37,7 +37,7 @@ import { VALUES, PROMISE } from '../data/content';
         <h2 class="section-head__title">What the floor runs on</h2>
       </div>
 
-      <ul class="entries" role="list">
+      <ul class="entries grid about__grid" role="list">
         {
           VALUES.map((item) => (
             <li class="entry">
@@ -57,7 +57,7 @@ import { VALUES, PROMISE } from '../data/content';
         <h2 class="section-head__title">What you can hold us to</h2>
       </div>
 
-      <ul class="entries entries--compact" role="list">
+      <ul class="entries entries--compact grid about__grid" role="list">
         {
           PROMISE.map((item) => (
             <li class="entry">
@@ -75,3 +75,13 @@ import { VALUES, PROMISE } from '../data/content';
     </div>
   </section>
 </Base>
+
+<style>
+  /* Four values and six promises: two-up at tablet, three-up at desktop.
+     Both counts fill a three-wide row without stranding one item alone. */
+  .about__grid {
+    --cols-md: 2;
+    --cols-lg: 3;
+    --grid-gap: 0 var(--space-10);
+  }
+</style>

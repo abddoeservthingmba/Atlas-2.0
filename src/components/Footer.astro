@@ -22,8 +22,9 @@ const year = new Date().getFullYear();
 ---
 
 <footer class="footer">
-  <div class="container">
-    <p class="eyebrow footer__eyebrow">Atlas Fitness Elite</p>
+  <div class="container footer__inner">
+    <div class="footer__col footer__col--brand">
+      <p class="eyebrow footer__eyebrow">Atlas Fitness Elite</p>
 
     <address class="footer__address">
       <a href={`https://maps.google.com/maps?q=${mapsQuery}`} rel="noopener">
@@ -39,6 +40,9 @@ const year = new Date().getFullYear();
       <li><a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
     </ul>
 
+    </div>
+
+    <div class="footer__col">
     <dl class="footer__hours">
       <div><dt>Mon–Sat</dt><dd>5:00 – 23:00</dd></div>
       <div><dt>Sunday</dt><dd>5:00 – 18:00</dd></div>
@@ -54,6 +58,8 @@ const year = new Date().getFullYear();
       <li><a href={SITE.social.instagram} rel="noopener">Instagram</a></li>
       <li><a href={SITE.social.facebook} rel="noopener">Facebook</a></li>
     </ul>
+
+    </div>
 
     <p class="footer__legal">© {year} {SITE.legalName}. All rights reserved.</p>
   </div>
@@ -168,5 +174,34 @@ const year = new Date().getFullYear();
     margin-top: var(--space-8);
     font-size: var(--text-2xs);
     color: var(--color-text-subtle);
+  }
+
+  @media (min-width: 48em) {
+    /* Two columns, with the legal line spanning both. */
+    .footer__inner {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--space-16);
+    }
+
+    .footer__legal {
+      grid-column: 1 / -1;
+      margin-top: var(--space-12);
+      padding-top: var(--space-6);
+      border-top: var(--border-quiet);
+    }
+
+    /* The hours rule already separates this block; the extra border above it
+       would double up once the columns sit side by side. */
+    .footer__hours {
+      border-top: 0;
+      padding-top: 0;
+    }
+  }
+
+  @media (min-width: 64em) {
+    .footer__inner {
+      column-gap: var(--space-24);
+    }
   }
 </style>
